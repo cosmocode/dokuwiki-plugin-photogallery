@@ -1,0 +1,173 @@
+/* load swipe box */
+@import "lightGallery/css/lightgallery.min.css";
+@import "lightGallery/css/lg-transitions.min.css";
+/*@import "lightGallery/css/lg-fb-comment-box.min.css";*/
+
+/* style overrides */
+.lg-backdrop.in {
+		//opacity: 0.95;
+}
+
+.lg-outer.lg-pull-caption-up.lg-thumb-open .lg-sub-html {
+//.lg-outer.lg-pull-caption-up.lg-thumb-open {
+  //bottom: 280px;
+}
+
+/* photogallery styles */
+.pg-container {
+	display:table;
+	/*background: #ff0;*/
+	vertical-align:center;
+	padding-bottom: 10px;
+}
+
+div.pg-container + div.pg-container{
+   margin-top:20px;
+}
+
+.pg-left {
+	padding:0px 10px 0px 0px;
+}
+
+.pg-right {
+	padding:0px 0px 0px 10px;
+}
+
+.pg-description {
+	/*background: #f0f;*/
+	display: table-cell;
+	width:100%;
+	vertical-align:middle;
+}
+
+.pg-show {
+	display:none;
+}
+
+/* Poster styles */
+.pg-poster {
+  margin-bottom: 15px;
+	display: table-cell;
+	vertical-align:middle;
+}
+
+.pg-poster a {
+  border: 3px solid #000;
+  border-radius: 5px;
+  display: block;
+  overflow: hidden;
+  position: relative;
+  float: left;
+}
+
+.pg-poster a > img {
+  -webkit-transition: -webkit-transform 0.15s ease 0s;
+  -moz-transition: -moz-transform 0.15s ease 0s;
+  -o-transition: -o-transform 0.15s ease 0s;
+  transition: transform 0.15s ease 0s;
+  -webkit-transform: scale3d(1, 1, 1);
+  transform: scale3d(1, 1, 1);
+/*  width: 100%;*/
+}
+
+.pg-poster a:hover > img {
+  -webkit-transform: scale3d(1.1, 1.1, 1.1);
+  transform: scale3d(1.1, 1.1, 1.1);
+}
+
+.pg-poster a:hover .pg-zoom > img {
+  opacity: 1;
+}
+
+.pg-poster a .pg-zoom {
+  background-color: rgba(0, 0, 0, 0.1);
+  bottom: 0;
+  left: 0;
+ /* position: absolute;*/
+  right: 0;
+  top: 0;
+  -webkit-transition: background-color 0.15s ease 0s;
+  -o-transition: background-color 0.15s ease 0s;
+  transition: background-color 0.15s ease 0s;
+}
+
+.pg-poster a .pg-zoom > img {
+  left: 50%;
+  margin-left: -10px;
+  margin-top: -10px;
+  opacity: 0;
+  position: absolute;
+  top: 50%;
+  -webkit-transition: opacity 0.3s ease 0s;
+  -o-transition: opacity 0.3s ease 0s;
+  transition: opacity 0.3s ease 0s;
+}
+
+.pg-poster a:hover .pg-zoom {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.pg-poster > a > img {
+  -webkit-transition: -webkit-transform 0.15s ease 0s;
+  -moz-transition: -moz-transform 0.15s ease 0s;
+  -o-transition: -o-transform 0.15s ease 0s;
+  transition: transform 0.15s ease 0s;
+  -webkit-transform: scale3d(1, 1, 1);
+  transform: scale3d(1, 1, 1);
+/*  height: 100%;
+  width: 100%;*/
+}
+
+.pg-poster > a:hover > img {
+  -webkit-transform: scale3d(1.1, 1.1, 1.1);
+  transform: scale3d(1.1, 1.1, 1.1);
+}
+
+.pg-poster > a:hover .pg-zoom > img {
+  opacity: 1;
+}
+
+.pg-poster > a .pg-zoom {
+  background-color: rgba(0, 0, 0, 0.1);
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  -webkit-transition: background-color 0.15s ease 0s;
+  -o-transition: background-color 0.15s ease 0s;
+  transition: background-color 0.15s ease 0s;
+}
+
+.pg-poster > a .pg-zoom > img {
+  left: 50%;
+  margin-left: -10px;
+  margin-top: -10px;
+  opacity: 0;
+  position: absolute;
+  top: 50%;
+  -webkit-transition: opacity 0.3s ease 0s;
+  -o-transition: opacity 0.3s ease 0s;
+  transition: opacity 0.3s ease 0s;
+}
+
+.pg-poster > a:hover .pg-zoom {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.pg-poster .video .pg-zoom img {
+  height: 48px;
+  margin-left: -24px;
+  margin-top: -24px;
+  opacity: 0.8;
+  width: 48px;
+}
+
+.pg-poster.dark > ul > li a {
+  border: 3px solid #04070a;
+}
+
+/*#aniimated-thumbnials .pg-poster a {
+  width: 190px;
+  height: 132px;
+}*/
