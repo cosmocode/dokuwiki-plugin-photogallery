@@ -267,7 +267,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				
 				//dbg($data);
 				if ($data['crop'])
-					$R->doc .= 'Ciao';
+					$R->doc .= 'Ciao'; // NOM da controllare
 				
         $cmd = $data['command'];
 				if (!$data['rss']){
@@ -340,8 +340,8 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
             $data['rss'] = true;
         }else{
             $dir = utf8_encodeFN(str_replace(':','/',$data['ns']));
-            // all possible images for the given namespace (or a single image)
-            if(is_file($conf['mediadir'].'/'.$dir)){
+            // all possible images for the given namespace
+            if(is_file($conf['mediadir'].'/'.$dir)){ //NOM da togliere, file singolo
                 require_once(DOKU_INC.'inc/JpegMeta.php');
                 $files[] = array(
                     'id'    => $data['ns'],
@@ -366,17 +366,36 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         $len = count($files);
         if(!$len) return $files;
         if($len == 1) return $files;
-
         // filter images
         for($i=0; $i<$len; $i++){
+						$fname = $files[$i]['file'];
+						if(preg_match('/\_pano\_\.(jpe?g|gif|png)$/',$fname))   // Is a panoramic image
+							$files[$i]['ispan'] = true;
+						if(preg_match('/\_poster\_\.(jpe?g|gif|png)$/',$fname)) // Is a video poster image, remove from list
+							$files[$i]['isimg'] = false;
             if(!$files[$i]['isimg']){
-//               unset($files[$i]); // this is faster, because RE was done before
-								array_splice($files, $i, 1); // unset will not reindex the array, so putting the poster on first position fails
-								$len--;
-								$i--;
-            }elseif($data['filter']){
-                if(!preg_match($data['filter'],noNS($files[$i]['id']))) unset($files[$i]); // NOM da verificare unset come sopra
+								if(preg_match('/\.(avi|mov|mp4)$/',$fname))         // Is a video
+									$files[$i]['isvid'] = true;
+								else{
+//		               unset($files[$i]); // this is faster, because RE was done before
+										array_splice($files, $i, 1); // unset will not reindex the array, so putting the poster on first position fails
+										$len--;
+										$i--;
+								}
             }
+						else{
+								if($data['filter']){
+									if(!preg_match($data['filter'],noNS($files[$i]['id']))) unset($files[$i]); // NOM da verificare unset come sopra
+							}
+            }
+            // if(!$files[$i]['isimg']){
+// //               unset($files[$i]); // this is faster, because RE was done before
+								// array_splice($files, $i, 1); // unset will not reindex the array, so putting the poster on first position fails
+								// $len--;
+								// $i--;
+            // }elseif($data['filter']){
+                // if(!preg_match($data['filter'],noNS($files[$i]['id']))) unset($files[$i]); // NOM da verificare unset come sopra
+            // }
         }
         if($len<1) return $files;
 
@@ -406,7 +425,6 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 					$files[0] = $files[$i];
 					$files[$i] = $tmp;
 				}
-
         return $files;
     }
 
@@ -516,8 +534,11 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 
 				$i = 0;
 				foreach($files as $img){
-						$ret .= $this->_image($img,$data,$i);
-						$i++;
+					if ($img['isimg'])
+							$ret .= $this->_image($img,$data,$i);
+					elseif ($img['isvid'])
+							$ret .= $this->_video($img,$data,$i);
+					$i++;
 				}
 
 				// Close containers
@@ -588,7 +609,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 					$R->doc .= 'showAfterLoad:true,'.DOKU_LF;
 					$R->doc .= 'pause:4000,'.DOKU_LF;
 					$R->doc .= 'preload:1,'.DOKU_LF;
-					$R->doc .= 'mode: "lg-fade",'.DOKU_LF;
+					$R->doc .= 'mode:"lg-fade",'.DOKU_LF;
 					$R->doc .= 'thumbWidth:'.$data['tw'].','.DOKU_LF;
 					$R->doc .= 'thumbContHeight:'.$ch.DOKU_LF;
 					$R->doc .= '});}'.DOKU_LF;
@@ -622,7 +643,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 		}
 		
 		/**
-     * Defines how a thumbnail should look like
+     * Defines the lightGallery images markup
      */
     function _image(&$img,$data,$idx){
 
@@ -672,7 +693,71 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				if ($idx < 4){
 					$ret .= '<img class="pg-preload" style="display:none;" src="'.$src.'"/>'.DOKU_LF;
 				};
-					
+        $ret .= '</li>'.DOKU_LF;
+        return $ret;
+    }
+
+		/**
+     * Defines the lightGallery video markup
+     */
+    function _video(&$img,$data,$idx){
+        // calculate thumbnail size
+				$w = $data['tw'];
+				$h = $data['th'];
+
+				$dim = array('w'=>$w,'h'=>$h);
+				
+        //prepare img attributes
+        $i             = array();
+        $i['width']    = $w;
+        $i['height']   = $h;
+        $i['border']   = 0;
+        $i['title']    = $this->_caption($img,$data);
+//        $i['class']    = 'tn';
+        $iatt = buildAttributes($i);
+        $src  = ml($img['id'],$dim);
+
+        // prepare lightbox dimensions
+        $w_lightbox = (int) $this->_meta($img,'width');
+        $h_lightbox = (int) $this->_meta($img,'height');
+        $dim_lightbox = array();
+        if($w_lightbox > $data['iw'] || $h_lightbox > $data['ih']){
+            $ratio = $this->_ratio($img,$data['iw'],$data['ih']);
+            $w_lightbox = floor($w_lightbox * $ratio);
+            $h_lightbox = floor($h_lightbox * $ratio);
+            $dim_lightbox = array('w'=>$w_lightbox,'h'=>$h_lightbox);
+        }
+				$dim_lightbox = array('w'=>800,'h'=>600);
+
+        //prepare link attributes
+        $a = array();
+        $a['alt'] = $this->_caption($img,$data);
+        $href = ml($img['id'],$dim_lightbox);
+				$post = ml(getNS($img['id']).':'.pathinfo(noNS($img['id']),PATHINFO_FILENAME).'_poster_.jpg',$dim_lightbox);
+        $aatt = buildAttributes($a);
+
+				// $baz = FFmpeg::Thumbnail->new( { video => $post } );
+				// $baz->output_width( 640 );
+				// $baz->output_height( 480 );
+				// $baz->offset( 21 );
+				// $baz->create_thumbnail( undef, '/my/first/thumbnail.png');
+				
+				//$movie = new ffmpeg_movie($post,true);
+				
+				
+  			$ret ='';
+				$ret .= '<li data-poster="'.$post.'" data-sub-html="video caption1" data-html="#video'.$idx.'">'.DOKU_LF;
+//				$ret .= '<li data-html="#video'.$idx.'">'.DOKU_LF;
+				$ret .= '<img src="'.$post.'"/>'.DOKU_LF;
+
+				// Video	
+				$ret .= '<div id="video'.$idx.'" style="display:none;">'.DOKU_LF;
+				$ret .= '<video class="lg-video-object lg-html5" controls preload="none">';
+				$ret .= '<source src="'.$href.'" type="video/mp4">';
+				$ret .= 'Your browser does not support HTML5 video.';
+				$ret .= '</video>';
+				$ret .= '</div>';
+
         $ret .= '</li>'.DOKU_LF;
         return $ret;
     }
