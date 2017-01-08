@@ -345,7 +345,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
                 require_once(DOKU_INC.'inc/JpegMeta.php');
                 $files[] = array(
                     'id'    => $data['ns'],
-                    'isimg' => preg_match('/\.(jpe?g|gif|png|mp4)$/',$dir),
+                    'isimg' => preg_match('/\.(jpe?g|gif|png)$/',$dir),
                     'file'  => basename($dir),
                     'mtime' => filemtime($conf['mediadir'].'/'.$dir),
                     'meta'  => new JpegMeta($conf['mediadir'].'/'.$dir)
@@ -366,9 +366,9 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         $len = count($files);
         if(!$len) return $files;
         if($len == 1) return $files;
+
         // filter images
         for($i=0; $i<$len; $i++){
-//					$files[$i]['isimg']=true;
             if(!$files[$i]['isimg']){
 //               unset($files[$i]); // this is faster, because RE was done before
 								array_splice($files, $i, 1); // unset will not reindex the array, so putting the poster on first position fails
@@ -588,7 +588,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 					$R->doc .= 'showAfterLoad:true,'.DOKU_LF;
 					$R->doc .= 'pause:4000,'.DOKU_LF;
 					$R->doc .= 'preload:1,'.DOKU_LF;
-					$R->doc .= 'mode:"lg-fade",'.DOKU_LF;
+					$R->doc .= 'mode: "lg-fade",'.DOKU_LF;
 					$R->doc .= 'thumbWidth:'.$data['tw'].','.DOKU_LF;
 					$R->doc .= 'thumbContHeight:'.$ch.DOKU_LF;
 					$R->doc .= '});}'.DOKU_LF;
