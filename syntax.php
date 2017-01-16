@@ -369,13 +369,23 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         // filter images
         for($i=0; $i<$len; $i++){
 						$fname = $files[$i]['file'];
-						if(preg_match('/\_pano\_\.(jpe?g|gif|png)$/',$fname))   // Is a panoramic image
-							$files[$i]['ispan'] = true;
-						if(preg_match('/\_poster\_\.(jpe?g|gif|png)$/',$fname)) // Is a video poster image, remove from list
-							$files[$i]['isimg'] = false;
+						$files[$i]['size'] = 'normal';			// Use configuration size
+						if (preg_match('/\_([a-z]+?)\_\.(jpe?g|gif|png)$/',$fname,$matches)){
+							$modifier = $matches[1];
+							if($modifier == 'pano')						// Is a panoramic image
+								$files[$i]['size'] = 'panorama';
+							elseif($modifier == 'fullsize')		// Show in full size
+								$files[$i]['size'] = 'full';
+							elseif($modifier == 'poster')			// Is a video poster image, remove from list
+								$files[$i]['isimg'] = false;
+						}
             if(!$files[$i]['isimg']){
-								if(preg_match('/\.(avi|mov|mp4)$/',$fname))         // Is a video
-									$files[$i]['isvid'] = true;
+								if(preg_match('/(.*?)\.(avi|mov|mp4)$/',$fname,$matches)){	// Is a video
+										$files[$i]['isvid'] = true;
+										$poster = getNS($files[$i]['id']).':'.$matches[1].'_poster_.jpg';
+										if(in_array($poster,array_column($files,'id'))) // Check if poster exists
+												$files[$i]['poster'] = $poster;
+								}
 								else{
 //		               unset($files[$i]); // this is faster, because RE was done before
 										array_splice($files, $i, 1); // unset will not reindex the array, so putting the poster on first position fails
@@ -647,51 +657,58 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
      */
     function _image(&$img,$data,$idx){
 
-        // calculate thumbnail size
-				$w = $data['tw'];
-				$h = $data['th'];
+        // prepare thumbnail dimensions
+				$tw = $data['tw'];
+				$th = $data['th'];
+				$tdim = array('w'=>$data['tw'],'h'=>$data['th']);
+        $tsrc  = ml($img['id'],$tdim);
+				// and attributes
+        $ta = array();
+        $ta['alt'] = $this->_caption($img,$data);
+        $tatt = buildAttributes($ta);
 
-				$dim = array('w'=>$w,'h'=>$h);
-
-        //prepare img attributes
-        $i             = array();
-        $i['width']    = $w;
-        $i['height']   = $h;
-        $i['border']   = 0;
-        $i['title']    = $this->_caption($img,$data);
-//        $i['class']    = 'tn';
-        $iatt = buildAttributes($i);
-        $src  = ml($img['id'],$dim);
-
-        // prepare lightbox dimensions
-        $w_lightbox = (int) $this->_meta($img,'width');
-        $h_lightbox = (int) $this->_meta($img,'height');
-        $dim_lightbox = array();
-        if($w_lightbox > $data['iw'] || $h_lightbox > $data['ih']){
-            $ratio = $this->_ratio($img,$data['iw'],$data['ih']);
-            $w_lightbox = floor($w_lightbox * $ratio);
-            $h_lightbox = floor($h_lightbox * $ratio);
-            $dim_lightbox = array('w'=>$w_lightbox,'h'=>$h_lightbox);
-        }
-
-        //prepare link attributes
-        $a = array();
-        $a['alt'] = $this->_caption($img,$data);
-        $href = ml($img['id'],$dim_lightbox);
-        $aatt = buildAttributes($a);
+        // prepare image dimensions
+				if ($img['size'] == 'panorama'){
+						$cropw = 4000; //NOM mettere parametri di config
+						$croph = $data['ih'];
+				} elseif ($img['size'] == 'full'){
+						$cropw = (int) $this->_meta($img,'width');
+						$croph = (int) $this->_meta($img,'height');
+				} else{
+						$cropw = $data['iw'];
+						$croph = $data['ih'];
+				} 
+				$iw = (int) $this->_meta($img,'width');
+				$ih = (int) $this->_meta($img,'height');
+        $idim = array();
+				// crop to lightbox dimensions
+				if($iw > $cropw || $ih > $croph){
+						$ratio = $this->_ratio($img,$cropw,$croph);
+						$iw = floor($iw * $ratio);
+						$ih = floor($ih * $ratio);
+				}
+				$idim = array('w'=>$iw,'h'=>$ih);
+        $isrc = ml($img['id'],$idim);
+        //prepare image attributes
+        // $ia  = array();
+        // $ia['width'] = $iw;
+        // $ia['height'] = $ih;
+        // $ia['border'] = 0;
+        // $ia['title'] = $this->_caption($img,$data);
+        // $iatt = buildAttributes($ia); //NOM not used yet
 
   			$ret ='';
 				$style =' style="display:none;"';
 				$style = '';
-				$ret .= '<li data-src="'.$href.'"'.$style.'>'.DOKU_LF;
+				$ret .= '<li data-src="'.$isrc.'"'.$style.'>'.DOKU_LF;
 				if ($idx < 25){
-					$ret .= '<img class="pg-preload" src="'.$src.'" '.$aatt.'/>'.DOKU_LF;
+					$ret .= '<img class="pg-preload" src="'.$tsrc.'" '.$tatt.'/>'.DOKU_LF;
 				}
 				else{
-					$ret .= '<img class="pg-preload" data-src="'.$src.'" '.$aatt.'/>'.DOKU_LF;
+					$ret .= '<img class="pg-preload" data-src="'.$tsrc.'" '.$tatt.'/>'.DOKU_LF;
 				};
 				if ($idx < 4){
-					$ret .= '<img class="pg-preload" style="display:none;" src="'.$src.'"/>'.DOKU_LF;
+					$ret .= '<img class="pg-preload" style="display:none;" src="'.$tsrc.'"/>'.DOKU_LF;
 				};
         $ret .= '</li>'.DOKU_LF;
         return $ret;
@@ -733,9 +750,15 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         $a = array();
         $a['alt'] = $this->_caption($img,$data);
         $href = ml($img['id'],$dim_lightbox);
-				$post = ml(getNS($img['id']).':'.pathinfo(noNS($img['id']),PATHINFO_FILENAME).'_poster_.jpg',$dim_lightbox);
-        $aatt = buildAttributes($a);
-
+				if($img['poster']){
+						$post = ml($img['poster'],$dim_lightbox);
+//						dbg($post);
+						$thumb = $post;
+				}else{
+						$thumb = DOKU_PHOTOGALLERY.'/images/movie_thumb.png';
+						$post = DOKU_PHOTOGALLERY.'/images/movie_poster.jpg';
+				}
+				$aatt = buildAttributes($a);
 				// $baz = FFmpeg::Thumbnail->new( { video => $post } );
 				// $baz->output_width( 640 );
 				// $baz->output_height( 480 );
@@ -746,17 +769,18 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				
 				
   			$ret ='';
+				// Poster
 				$ret .= '<li data-poster="'.$post.'" data-sub-html="video caption1" data-html="#video'.$idx.'">'.DOKU_LF;
 //				$ret .= '<li data-html="#video'.$idx.'">'.DOKU_LF;
-				$ret .= '<img src="'.$post.'"/>'.DOKU_LF;
+				$ret .= '<img src="'.$thumb.'"/>'.DOKU_LF;
 
 				// Video	
 				$ret .= '<div id="video'.$idx.'" style="display:none;">'.DOKU_LF;
 				$ret .= '<video class="lg-video-object lg-html5" controls preload="none">';
 				$ret .= '<source src="'.$href.'" type="video/mp4">';
 				$ret .= 'Your browser does not support HTML5 video.';
-				$ret .= '</video>';
-				$ret .= '</div>';
+				$ret .= '</video>'.DOKU_LF;
+				$ret .= '</div>'.DOKU_LF;
 
         $ret .= '</li>'.DOKU_LF;
         return $ret;
