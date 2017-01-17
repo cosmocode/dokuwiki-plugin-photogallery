@@ -7,6 +7,7 @@
  */
  
 $lang['imagescnt'] = '%s immagini';
+$lang['videoscnt'] = '%s video';
 $lang['lnk_download'] = 'Scarica';
 $lang['notauthorized'] = 'Mi dispiace, non sei autorizzato a vedere questa galleria di foto.';
 $lang['nsnotexists'] = 'Attenzione, la cartella relativa al namespace <b>%s</b> non esiste.';

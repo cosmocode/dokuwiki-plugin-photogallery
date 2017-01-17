@@ -425,7 +425,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         }
 
         // limits and offsets?
-        if($data['offset']) $files = array_slice($files,$data['offset']);
+        if($data['offset']) $files = array_slice($files,$data['offset']);//NOM da implementare
         if($data['limit']) $files = array_slice($files,0,$data['limit']);
 
 				// puts poster element in first array position
@@ -632,6 +632,14 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
      * Defines how a description  should look like
      */
     function _description($files,$data,$R){
+				$imgcnt = 0;
+				$vidcnt = 0;
+				foreach ($files as $file){
+					if ($file['isimg'])
+						$imgcnt++;
+					elseif ($file['isvid'])
+						$vidcnt++;
+				}
 				if ($data['posteralign'] == 'right')
 					$R->doc .= '<div class="pg-description pg-left">'.DOKU_LF;
 				else
@@ -640,7 +648,10 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				$R->header($data['title'],2,0);
 				$R->doc .= '<p>'.$data['description'].'</p>';
 				$R->doc .= '<p>';
-				$R->doc .= sprintf($this->getLang('imagescnt'),count($files));
+				$info = '';
+				$this->_addString($info,$imgcnt,sprintf($this->getLang('imagescnt'),$imgcnt));
+				$this->_addString($info,$vidcnt,sprintf($this->getLang('videoscnt'),$vidcnt),', ');
+				$R->doc .= $info;
 				if (isset($data['ziplink'])){
 						$R->doc .= ' - '.$data['ziplink'];
 				}
@@ -834,7 +845,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 						$this->_addString($ret,$shutter,$shutter.'s',', ');
 						$this->_addString($ret,$fnumber,'f/'.$fnumber,', ');
 						$this->_addString($ret,$iso,'ISO '.$iso,', ');
-						$this->_addString($ret,$ret,NULL,NULL,'<p>','</p>');
+						$this->_addString($ret,$ret,null,null,'<p>','</p>');
 				}
 				return $ret;
 		}
