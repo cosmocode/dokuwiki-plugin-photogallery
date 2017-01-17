@@ -11,6 +11,8 @@ $lang['thumbnail_width']  = 'Thumbnail image width';
 $lang['thumbnail_height'] = 'Thumbnail image height';
 $lang['image_width']      = 'Image width';
 $lang['image_height']     = 'Image height';
+$lang['panorama_width']   = 'Panoramic image width';
+$lang['panorama_height']  = 'Panoramic image height';
 $lang['posteralign']      = 'Poster image alignment (left|right)';
 
 $lang['sort']         = 'How to sort the gallery images';

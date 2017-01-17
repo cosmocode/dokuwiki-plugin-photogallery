@@ -79,6 +79,8 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         $data['th']          = $this->getConf('thumbnail_height');
         $data['iw']          = $this->getConf('image_width');
         $data['ih']          = $this->getConf('image_height');
+        $data['panw']        = $this->getConf('panorama_width');
+        $data['panh']        = $this->getConf('panorama_height');
         $data['posteralign'] = $this->getConf('posteralign');
         $data['filter']      = '';
         $data['sort']        = $this->getConf('sort');
@@ -233,9 +235,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
     function render($mode, Doku_Renderer $R, $data){
         global $ID;
 				global $conf;
-//dbg($conf);
-				 //dbg($data);
-				 //return false;
+
 				$cmd = $data['command'];
         if($mode == 'xhtml'){
 						if($this->_auth_check($data)){
@@ -266,8 +266,6 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				global $ID;
 				
 				//dbg($data);
-				if ($data['crop'])
-					$R->doc .= 'Ciao'; // NOM da controllare
 				
         $cmd = $data['command'];
 				if (!$data['rss']){
@@ -398,14 +396,6 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 									if(!preg_match($data['filter'],noNS($files[$i]['id']))) unset($files[$i]); // NOM da verificare unset come sopra
 							}
             }
-            // if(!$files[$i]['isimg']){
-// //               unset($files[$i]); // this is faster, because RE was done before
-								// array_splice($files, $i, 1); // unset will not reindex the array, so putting the poster on first position fails
-								// $len--;
-								// $i--;
-            // }elseif($data['filter']){
-                // if(!preg_match($data['filter'],noNS($files[$i]['id']))) unset($files[$i]); // NOM da verificare unset come sopra
-            // }
         }
         if($len<1) return $files;
 
@@ -666,8 +656,6 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
     function _image(&$img,$data,$idx){
 
         // prepare thumbnail dimensions
-				$tw = $data['tw'];
-				$th = $data['th'];
 				$tdim = array('w'=>$data['tw'],'h'=>$data['th']);
         $tsrc  = ml($img['id'],$tdim);
 				// and attributes
@@ -677,8 +665,8 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 
         // prepare image dimensions
 				if ($img['size'] == 'panorama'){
-						$cropw = 4000; //NOM mettere parametri di config
-						$croph = $data['ih'];
+						$cropw = $data['panw'];
+						$croph = $data['panh'];
 				} elseif ($img['size'] == 'full'){
 						$cropw = (int) $this->_meta($img,'width');
 						$croph = (int) $this->_meta($img,'height');
@@ -929,6 +917,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 						$source = $prefix.$source.$suffix;
 				}
 		}
+}
 //				$jpeg = new JpegMeta(mediaFN($img['id']));
 				// if($ext == 'jpg' || $ext == 'jpeg') {
                 // //try to use the caption from IPTC/EXIF
@@ -958,31 +947,11 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
             // resolve_pageid(getNS($parent_id), $page, $exists); // resolve shortcuts and clean ID
             // if (auth_quickaclcheck($page) >= AUTH_READ)
                 // $pages[] = $page;
-}
   
 	    // function _showname($img,$data){
-        // global $ID;
-
-        // if(!$data['showname'] ) { return ''; }
 
         // //prepare link
         // $lnk = ml($img['id'],array('id'=>$ID),false);
 
         // // prepare output
-        // $ret  = '';
-        // $ret .= '<br /><a href="'.$lnk.'">';
         // $ret .= hsc($img['file']);
-        // $ret .= '</a>';
-        // return $ret;
-    // }
-
-     // //prepare link
-        // $lnk = ml($img['id'],array('id'=>$ID),false);
-
-        // // prepare output
-        // $ret  = '';
-        // $ret .= '<br /><a href="'.$lnk.'">';
-        // $ret .= hsc($this->_meta($img,'title'));
-        // $ret .= '</a>';
-        // return $ret;
-		

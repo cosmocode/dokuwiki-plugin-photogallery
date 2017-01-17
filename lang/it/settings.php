@@ -11,6 +11,8 @@ $lang['thumbnail_width']  = 'Larghezza immagine anteprima';
 $lang['thumbnail_height'] = 'Altezza immagine anteprima';
 $lang['image_width']      = 'Larghezza immagine';
 $lang['image_height']     = 'Altezza immagine';
+$lang['panorama_width']   = 'Larghezza immagine panoramica';
+$lang['panorama_height']  = 'Altezza immagine panoramica';
 $lang['posteralign']      = 'Allineamento dell\'immagine poster (left|right)';
 
 $lang['sort']         = 'Ordinamemento delle immagini';
