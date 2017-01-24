@@ -1,8 +1,9 @@
 <?php
 /**
- * Options for the gallery plugin
+ * Options for the photogallery plugin
  *
- * @author Marco Nolletti <mnolletti@gmail.com>
+ * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * @author  Marco Nolletti
  */
 
 $meta['poster_width']     = array('numeric');

@@ -1,8 +1,9 @@
 <?php
 /**
- * Italian language file for gallery plugin
+ * Italian language file for photogallery plugin
  *
- * @author Marco Nolletti <mnolletti@gmail.com>
+ * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * @author  Marco Nolletti
  */
 
 $lang['poster_width']     = 'Larghezza immagine poster';
@@ -23,6 +24,13 @@ $lang['sort_o_title'] = 'Ordina per titolo EXIF';
 $lang['sort_o_random'] = 'Ordina casualmente';
 
 $lang['options'] = 'Altre opzioni di default';
+$lang['options_o_cache'] = 'Cache';
+$lang['options_o_crop'] = 'Ritaglia';
+$lang['options_o_reverse'] = 'Inverti';
+$lang['options_o_recursive'] = 'Ricerca ricorsiva';
+$lang['options_o_showtitle'] = 'Mostra titolo';
+$lang['options_o_showinfo'] = 'Mostra info EXIF';
+$lang['options_o_showfname'] = 'Mostra nome file';
 
-$lang['reverse']          = 'Inverti ordine';
-$lang['js_ok']            = 'Allow javascript urls';
+/*$lang['reverse']          = 'Inverti ordine';
+$lang['js_ok']            = 'Allow javascript urls';*/

@@ -1,8 +1,9 @@
 <?php
 /**
- * English language file for gallery plugin
+ * English language file for photogallery plugin
  *
- * @author Marco Nolletti <mnolletti@gmail.com>
+ * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * @author  Marco Nolletti
  */
 
 $lang['poster_width']     = 'Poster image width';
@@ -23,4 +24,11 @@ $lang['sort_o_title'] = 'Sort by EXIF title';
 $lang['sort_o_random'] = 'Sort randomly';
 
 $lang['options'] = 'Additional default options';
+$lang['options_o_cache'] = 'Cache';
+$lang['options_o_crop'] = 'Crop';
+$lang['options_o_reverse'] = 'Invert sort order';
+$lang['options_o_recursive'] = 'Recurse subfolders';
+$lang['options_o_showtitle'] = 'Show the title of the image';
+$lang['options_o_showinfo'] = 'Show EXIF info';
+$lang['options_o_showfname'] = 'Show the filename';
 

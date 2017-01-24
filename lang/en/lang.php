@@ -1,9 +1,9 @@
 <?php
 /**
- * english language file
+ * English language file for photogallery plugin
  *
- * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
- * @author     Marco Nolletti
+ * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * @author  Marco Nolletti
  */
 
 $lang['imagescnt'] = '%s immges';
