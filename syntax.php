@@ -8,7 +8,7 @@
 
 if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../').'/');
 if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
-if(!defined('DOKU_PHOTOGALLERY')) define('DOKU_PHOTOGALLERY','/home/lib/plugins/photogallery/');
+if(!defined('DOKU_PHOTOGALLERY')) define('DOKU_PHOTOGALLERY',dirname($_SERVER["PHP_SELF"]).'/lib/plugins/photogallery/');
 require_once(DOKU_PLUGIN.'syntax.php');
 require_once(DOKU_INC.'inc/search.php');
 require_once(DOKU_INC.'inc/JpegMeta.php');
@@ -40,7 +40,6 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
      * Connect pattern to lexer
      */
     function connectTo($mode) {
-//        $this->Lexer->addSpecialPattern('\{\{photogallery>[^}]*\}\}',$mode,'plugin_photogallery');
 				$this->Lexer->addSpecialPattern('----+ *photogallery(?: [ a-zA-Z0-9_]*)?-+\n.*?\n----+', $mode, 'plugin_photogallery');
     }
 
