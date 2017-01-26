@@ -592,21 +592,13 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				if ($cmd == 'show'){
 					$R->doc .= $this->_lightgallery($files,$data,$pgid);
 
-					// Create lightGallery init function
+					// Call lightGallery init function
 					$ch = strval(intval($data['th'])+20);
-					$R->doc .= '<script>'.DOKU_LF;
-					$R->doc .= 'function InitPgGallery(){'.DOKU_LF;
-					$R->doc .= 'jQuery("ul.pg-show").lightGallery({'.DOKU_LF;
-					$R->doc .= 'thumbnail:true,'.DOKU_LF;
-					$R->doc .= 'autoplay:true,'.DOKU_LF;
-					$R->doc .= 'showAfterLoad:true,'.DOKU_LF;
-					$R->doc .= 'pause:4000,'.DOKU_LF;
-					$R->doc .= 'preload:1,'.DOKU_LF;
-					$R->doc .= 'mode:"lg-fade",'.DOKU_LF;
-					$R->doc .= 'thumbWidth:'.$data['tw'].','.DOKU_LF;
-					$R->doc .= 'thumbContHeight:'.$ch.DOKU_LF;
-					$R->doc .= '});}'.DOKU_LF;
-					$R->doc .= '</script>'.DOKU_LF;
+					$R->doc .= '<script type="text/javascript">/*<![CDATA[*/'.DOKU_LF;
+					$R->doc .= 'jQuery(function(){';
+					$R->doc .= 'InitPgGallery('.$data['tw'].','.$ch.');';
+					$R->doc .= '});'.DOKU_LF;
+					$R->doc .= '/*!]]>*/</script>'.DOKU_LF;
 					
 					// Override styles to match thumb size
 					$R->doc .= '<style>.lg-outer.lg-pull-caption-up.lg-thumb-open .lg-sub-html {bottom:'.$ch.'px;}</style>';
