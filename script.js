@@ -48,6 +48,23 @@
     return false;
 }*/
 
+/**
+ * Initialize lightGallery for pg-show class
+ */
+function InitPgGallery(tw,th){
+		jQuery("ul.pg-show").lightGallery({
+				thumbnail:true,
+				autoplay:true,
+				showAfterLoad:true,
+				pause:4000,
+				preload:1,
+				mode:"lg-fade",
+				thumbWidth:tw,
+				thumbContHeight:th
+		});
+    return false;
+}
+
 //		alert("Sono qui");
 
 /**
@@ -60,13 +77,6 @@ jQuery(document).on('click', 'a.pg-start', function() {
 //			alert("ID= " + $img.attr('src'));
 	$img.trigger("click");
 	return false;
-});
-
-/**
-* Initialize lightGallery for pg-show class
-*/
-jQuery(document).ready(function(){
-	InitPgGallery(); // Function dinamically created by syntax.php
 });
 
 jQuery(window).load(function(){

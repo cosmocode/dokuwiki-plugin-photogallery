@@ -3,12 +3,12 @@
  * Embed an image gallery
  *
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
- * @author  Marco Nolletti <mnolletti@gmail.com>
+ * @author  Marco Nolletti
  */
 
 if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../').'/');
 if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
-if(!defined('DOKU_PHOTOGALLERY')) define('DOKU_PHOTOGALLERY','/home/lib/plugins/photogallery/');
+if(!defined('DOKU_PHOTOGALLERY')) define('DOKU_PHOTOGALLERY',dirname($_SERVER["PHP_SELF"]).'/lib/plugins/photogallery/');
 require_once(DOKU_PLUGIN.'syntax.php');
 require_once(DOKU_INC.'inc/search.php');
 require_once(DOKU_INC.'inc/JpegMeta.php');
@@ -40,7 +40,6 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
      * Connect pattern to lexer
      */
     function connectTo($mode) {
-//        $this->Lexer->addSpecialPattern('\{\{photogallery>[^}]*\}\}',$mode,'plugin_photogallery');
 				$this->Lexer->addSpecialPattern('----+ *photogallery(?: [ a-zA-Z0-9_]*)?-+\n.*?\n----+', $mode, 'plugin_photogallery');
     }
 
@@ -168,7 +167,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 						}
 //           $column = $this->dthlp->_column($line[0]);
 						$data [$line[0]]=$line[1];
-            // if(isset($matches[2])) {
+            // if(isset($matches[2])) {// NOM da verificare
                 // $column['comment'] = $matches[2];
             // }
             // if($column['multi']) {
@@ -194,6 +193,8 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         // return array(
             // 'data' => $data, 'command' => $command
         // ); // not utf8_strlen
+				
+				// If in link mode, read instructions from linked page
 				if ($cmd == 'link'){
 					$page = $data['pg'];
 					if (page_exists($page)){
@@ -207,7 +208,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 								}
 							}
 							if (isset($rdata)){
-								$data['ns'] = $rdada['ns'];
+								$data['ns'] = $rdata['ns'];
 								foreach ($rdata as $key => $value){
 									if ((!isset($data[$key])) and (isset($rdata[$key]))){
 										$data[$key] = $value;
@@ -239,12 +240,13 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				$cmd = $data['command'];
         if($mode == 'xhtml'){
 						if($this->_auth_check($data)){
-								$R->info['cache'] &= $data['cache']; //NOM capire
+								$R->info['cache'] &= $data['cache'];
 								$this->_photo_gallery($data, $R); // Start gallery
 						}
-						elseif($cmd == 'show'){
+						elseif($cmd == 'show')
 								$R->doc .= '<div class="nothing">'.$this->getLang('notauthorized').'</div>';
-						};
+						elseif($cmd == 'link')
+								dbg($this->getLang('notauthorized'));
 						return true;
         }elseif($mode == 'metadata'){ // NOM da rivedere
             $rel = p_get_metadata($ID,'relation',METADATA_RENDER_USING_CACHE);
@@ -308,12 +310,10 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				
 				// Close container
 				$R->doc .= '</div>'.DOKU_LF;
-
-        //return '<div class="gallery'.$align.'"'.$xalign.'>'.$pgret.$R->doc.'<div class="clearer"></div></div>';
 				return;
     }
 		
-    // function _showData($data, $R) {
+    // function _showData($data, $R) { // NOM da vedere
 
         // // if(method_exists($R, 'startSectionEdit')) {
             // // $data['classes'] .= ' ' . $R->startSectionEdit($data['pos'], 'plugin_data');
@@ -332,32 +332,18 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         global $conf;
         $files = array();
 
-        // http URLs are supposed to be media RSS feeds
+        // is a media RSS feed ?
         if($data['rss']){
             $files = $this->_loadRSS($data['ns']);
-            $data['rss'] = true;
         }else{
             $dir = utf8_encodeFN(str_replace(':','/',$data['ns']));
             // all possible images for the given namespace
-            if(is_file($conf['mediadir'].'/'.$dir)){ //NOM da togliere, file singolo
-                require_once(DOKU_INC.'inc/JpegMeta.php');
-                $files[] = array(
-                    'id'    => $data['ns'],
-                    'isimg' => preg_match('/\.(jpe?g|gif|png)$/',$dir),
-                    'file'  => basename($dir),
-                    'mtime' => filemtime($conf['mediadir'].'/'.$dir),
-                    'meta'  => new JpegMeta($conf['mediadir'].'/'.$dir)
-                );
-//                $data['_single'] = true;
-            }else{
-                $depth = $data['recursive'] ? 0 : 1;
-                search($files,
-                       $conf['mediadir'],
-                       'search_media',
-                       array('depth'=>$depth),
-                       $dir);
- //               $data['_single'] = false;
-            }
+						$depth = $data['recursive'] ? 0 : 1;
+						search($files,
+									 $conf['mediadir'],
+									 'search_media',
+									 array('depth'=>$depth),
+									 $dir);
         }
 
         // done, yet?
@@ -393,7 +379,8 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
             }
 						else{
 								if($data['filter']){
-									if(!preg_match($data['filter'],noNS($files[$i]['id']))) unset($files[$i]); // NOM da verificare unset come sopra
+									if(!preg_match($data['filter'],noNS($files[$i]['id'])))
+											unset($files[$i]); // NOM da verificare unset come sopra se si decide di usare filter
 							}
             }
         }
@@ -414,17 +401,26 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
             if($data['reverse']) $files = array_reverse($files);
         }
 
-        // limits and offsets?
-        if($data['offset']) $files = array_slice($files,$data['offset']);//NOM da implementare
-        if($data['limit']) $files = array_slice($files,0,$data['limit']);
+        // offset?
+        if($data['offset']){
+						$offset = $data['offset'];
+						$files = array_slice($files,$offset);
+				} else{
+						$offset = 0;
+				}
 
 				// puts poster element in first array position
 				$i = array_search($data['posterimg'], array_column($files, 'file'));
-				if ($i != 0){
-					$tmp = $files[0];
-					$files[0] = $files[$i];
+				if ($i != $offset){
+					$tmp = $files[$offset];
+					$files[$offset] = $files[$i];
 					$files[$i] = $tmp;
 				}
+
+        // limit?
+        if($data['limit'])
+						$files = array_slice($files,0,$data['limit']);
+
         return $files;
     }
 
@@ -596,21 +592,13 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				if ($cmd == 'show'){
 					$R->doc .= $this->_lightgallery($files,$data,$pgid);
 
-					// Create lightGallery init function
+					// Call lightGallery init function
 					$ch = strval(intval($data['th'])+20);
-					$R->doc .= '<script>'.DOKU_LF;
-					$R->doc .= 'function InitPgGallery(){'.DOKU_LF;
-					$R->doc .= 'jQuery("ul.pg-show").lightGallery({'.DOKU_LF;
-					$R->doc .= 'thumbnail:true,'.DOKU_LF;
-					$R->doc .= 'autoplay:true,'.DOKU_LF;
-					$R->doc .= 'showAfterLoad:true,'.DOKU_LF;
-					$R->doc .= 'pause:4000,'.DOKU_LF;
-					$R->doc .= 'preload:1,'.DOKU_LF;
-					$R->doc .= 'mode:"lg-fade",'.DOKU_LF;
-					$R->doc .= 'thumbWidth:'.$data['tw'].','.DOKU_LF;
-					$R->doc .= 'thumbContHeight:'.$ch.DOKU_LF;
-					$R->doc .= '});}'.DOKU_LF;
-					$R->doc .= '</script>'.DOKU_LF;
+					$R->doc .= '<script type="text/javascript">/*<![CDATA[*/'.DOKU_LF;
+					$R->doc .= 'jQuery(function(){';
+					$R->doc .= 'InitPgGallery('.$data['tw'].','.$ch.');';
+					$R->doc .= '});'.DOKU_LF;
+					$R->doc .= '/*!]]>*/</script>'.DOKU_LF;
 					
 					// Override styles to match thumb size
 					$R->doc .= '<style>.lg-outer.lg-pull-caption-up.lg-thumb-open .lg-sub-html {bottom:'.$ch.'px;}</style>';
