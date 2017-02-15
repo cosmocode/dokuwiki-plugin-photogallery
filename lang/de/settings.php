@@ -1,18 +1,36 @@
 <?php
-
 /**
- * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
- * 
- * @author Andreas Gohr <andi@splitbrain.org>
+ * German language file for photogallery plugin
+ *
+ * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * @author  Marco Nolletti / Felix Mühlbauer
  */
-$lang['thumbnail_width']       = 'Vorschaubildbreite';
-$lang['thumbnail_height']      = 'Vorschaubildhöhe';
-$lang['image_width']           = 'Bildbreite';
-$lang['image_height']          = 'Bildhöhe';
-$lang['cols']                  = 'Bilder pro Zeile';
-$lang['sort']                  = 'Sortierung der Galeriebilder';
-$lang['sort_o_file']           = 'nach Dateiname sortieren';
-$lang['sort_o_mod']            = 'nach Dateidatum sortieren';
-$lang['sort_o_date']           = 'nach EXIF-Datum sortieren';
-$lang['sort_o_title']          = 'nach EXIF-Titel sortieren';
-$lang['options']               = 'Zusätzliche Galerie Standard-Einstellungen';
+ 
+$lang['use_phpThumb']     = 'phpThumb für Cache und Thumbnails generation Verwenden';
+$lang['poster_width']     = 'Bildbreite für Poster';
+$lang['poster_height']    = 'Bildhöhe für Poster';
+$lang['thumbnail_width']  = 'Bildbreite für Vorschau';
+$lang['thumbnail_height'] = 'Bildhöhe für Vorschau';
+$lang['image_width']      = 'Bildbreite';
+$lang['image_height']     = 'Bildhöhe';
+$lang['panorama_ratio']   = 'Bild as Panorama betrachet wenn das Bildseitenverhältnis größer als der Parameter ist (A:B mit A>B)';
+$lang['panorama_width']   = 'Bildbreite für Panorama';
+$lang['panorama_height']  = 'Bildhöhe für Panorama';
+$lang['posteralign']      = 'Bildausrichtung für Poster (links=left|rechts=right)';
+
+$lang['sort']         = 'Sortierung der Galeriebilder';
+$lang['sort_o_file']  = 'Dateiname';
+$lang['sort_o_mod']   = 'Dateidatum';
+$lang['sort_o_date']  = 'EXIF Datum';
+$lang['sort_o_title'] = 'EXIF Titel';
+$lang['sort_o_random'] = 'Zufällig';
+
+$lang['options'] = 'Zusätzliche Standardeinstellungen';
+$lang['options_o_cache'] = 'Zwischenspeicher';
+$lang['options_o_crop'] = 'Zuschneiden';
+$lang['options_o_reverse'] = 'Sortierung umdrehen';
+$lang['options_o_recursive'] = 'Unterordner durchsuchen';
+$lang['options_o_showtitle'] = 'Titel des Bildes anzeigen';
+$lang['options_o_showinfo'] = 'EXIF Info anzeigen';
+$lang['options_o_showfname'] = 'Dateiname anzeigen';
+
