@@ -74,6 +74,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 
         // set the defaults
         $data['phpthumb']    = $this->getConf('use_phpThumb');
+        $data['autoplay']    = $this->getConf('autoplay');
         $data['pw']          = $this->getConf('poster_width');
         $data['ph']          = $this->getConf('poster_height');
         $data['tw']          = $this->getConf('thumbnail_width');
@@ -597,9 +598,10 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 
 					// Call lightGallery init function
 					$ch = strval(intval($data['th'])+20);
+					$auto = $data['autoplay'] ? 'true' : 'false';
 					$R->doc .= '<script type="text/javascript">/*<![CDATA[*/'.DOKU_LF;
 					$R->doc .= 'jQuery(function(){';
-					$R->doc .= 'InitPgGallery('.$data['tw'].','.$ch.');';
+					$R->doc .= 'InitPgGallery('.$data['tw'].','.$ch.','.$auto.');';
 					$R->doc .= '});'.DOKU_LF;
 					$R->doc .= '/*!]]>*/</script>'.DOKU_LF;
 					

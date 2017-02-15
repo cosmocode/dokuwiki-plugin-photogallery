@@ -7,6 +7,7 @@
  */
 
 $lang['use_phpThumb']     = 'Usa phpThumb per cache e generazione delle icone';
+$lang['autoplay']         = 'Avvia automaticamente l\'avanzamento delle foto';
 $lang['poster_width']     = 'Larghezza immagine poster';
 $lang['poster_height']    = 'Altezza immagine poster';
 $lang['thumbnail_width']  = 'Larghezza immagine anteprima';

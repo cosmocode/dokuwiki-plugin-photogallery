@@ -7,6 +7,7 @@
  */
 
 $meta['use_phpThumb']     = array('onoff');
+$meta['autoplay']         = array('onoff');
 $meta['poster_width']     = array('numeric');
 $meta['poster_height']    = array('numeric');
 $meta['thumbnail_width']  = array('numeric');

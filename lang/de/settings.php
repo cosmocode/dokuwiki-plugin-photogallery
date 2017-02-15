@@ -7,6 +7,7 @@
  */
  
 $lang['use_phpThumb']     = 'phpThumb für Cache und Thumbnails generation Verwenden';
+$lang['autoplay']         = 'Start automatisch die Galeriebilder Diashow';
 $lang['poster_width']     = 'Bildbreite für Poster';
 $lang['poster_height']    = 'Bildhöhe für Poster';
 $lang['thumbnail_width']  = 'Bildbreite für Vorschau';

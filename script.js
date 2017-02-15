@@ -12,10 +12,10 @@
 /**
  * Initialize lightGallery for pg-show class
  */
-function InitPgGallery(tw,th){
+function InitPgGallery(tw,th,play){
 		jQuery("ul.pg-show").lightGallery({
 				thumbnail:true,
-				autoplay:true,
+				autoplay:play,
 				showAfterLoad:true,
 				pause:4000,
 				preload:1,

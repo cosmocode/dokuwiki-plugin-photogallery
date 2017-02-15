@@ -7,6 +7,7 @@
  */
 
 $lang['use_phpThumb']     = 'Use phpThumb per cache and thumbnails generation';
+$lang['autoplay']         = 'Automatically start the photogallery slideshow';
 $lang['poster_width']     = 'Poster image width';
 $lang['poster_height']    = 'Poster image height';
 $lang['thumbnail_width']  = 'Thumbnail image width';

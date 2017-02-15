@@ -7,6 +7,7 @@
  */
 
 $conf['use_phpThumb']     = 1;
+$conf['autoplay']         = 1;
 $conf['poster_width']     = 220;
 $conf['poster_height']    = 220;
 $conf['thumbnail_width']  = 80;
