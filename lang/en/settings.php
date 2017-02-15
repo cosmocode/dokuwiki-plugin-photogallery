@@ -6,12 +6,15 @@
  * @author  Marco Nolletti
  */
 
+$lang['use_phpThumb']     = 'Use phpThumb per cache and thumbnails generation';
+$lang['autoplay']         = 'Automatically start the photogallery slideshow';
 $lang['poster_width']     = 'Poster image width';
 $lang['poster_height']    = 'Poster image height';
 $lang['thumbnail_width']  = 'Thumbnail image width';
 $lang['thumbnail_height'] = 'Thumbnail image height';
 $lang['image_width']      = 'Image width';
 $lang['image_height']     = 'Image height';
+$lang['panorama_ratio']   = 'Consider the image as panorama if the aspect ratio is greater than the parameter (A:B con A>B)';
 $lang['panorama_width']   = 'Panoramic image width';
 $lang['panorama_height']  = 'Panoramic image height';
 $lang['posteralign']      = 'Poster image alignment (left|right)';

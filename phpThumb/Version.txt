@@ -1,0 +1,2 @@
+Version 1.7.14
+Content of phpThumb folder of the repository downloaded from https://github.com/JamesHeinrich/phpThumb.git

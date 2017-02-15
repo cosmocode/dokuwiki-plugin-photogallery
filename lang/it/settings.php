@@ -6,12 +6,15 @@
  * @author  Marco Nolletti
  */
 
+$lang['use_phpThumb']     = 'Usa phpThumb per cache e generazione delle icone';
+$lang['autoplay']         = 'Avvia automaticamente l\'avanzamento delle foto';
 $lang['poster_width']     = 'Larghezza immagine poster';
 $lang['poster_height']    = 'Altezza immagine poster';
 $lang['thumbnail_width']  = 'Larghezza immagine anteprima';
 $lang['thumbnail_height'] = 'Altezza immagine anteprima';
 $lang['image_width']      = 'Larghezza immagine';
 $lang['image_height']     = 'Altezza immagine';
+$lang['panorama_ratio']   = 'Considera l\'immagine panoramica se il suo rapporto di forma &egrave maggiore del parametro (A:B con A>B)';
 $lang['panorama_width']   = 'Larghezza immagine panoramica';
 $lang['panorama_height']  = 'Altezza immagine panoramica';
 $lang['posteralign']      = 'Allineamento dell\'immagine poster (left|right)';

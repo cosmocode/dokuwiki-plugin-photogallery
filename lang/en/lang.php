@@ -6,7 +6,7 @@
  * @author  Marco Nolletti
  */
 
-$lang['imagescnt'] = '%s immges';
+$lang['imagescnt'] = '%s images';
 $lang['videoocnt'] = '%s videos';
 $lang['lnk_download'] = 'Download';
 $lang['notauthorized'] = 'Sorry, you are not allowed to view this photo gallery.';

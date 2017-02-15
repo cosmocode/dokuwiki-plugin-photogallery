@@ -1,2 +1,2 @@
-Version 1.3.7
+Version 1.3.9
 Content of dist folder of the zip file downloaded from https://github.com/sachinchoolur/lightGallery/archive/master.zip
