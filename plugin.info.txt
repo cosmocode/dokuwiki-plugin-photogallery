@@ -1,7 +1,7 @@
 base   photogallery
 author Marco Nolletti
 email  mnolletti@gmail.com
-date   2017-02-15
+date   2017-03-02
 name   PhotoGallery Plugin
 desc   Creates a gallery of images from a namespace
 url    http://www.dokuwiki.org/plugin:photogallery
