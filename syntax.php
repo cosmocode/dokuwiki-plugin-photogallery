@@ -8,13 +8,18 @@
 
 if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../').'/');
 if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
-if(!defined('DOKU_PHOTOGALLERY')) define('DOKU_PHOTOGALLERY',dirname($_SERVER["PHP_SELF"]).'/lib/plugins/photogallery/');
+if(!defined('PHOTOGALLERY_REL')) define('PHOTOGALLERY_REL',DOKU_REL.'lib/plugins/photogallery/');
+if(!defined('PHOTOGALLERY_PGIMG')) define('PHOTOGALLERY_PGIMG','phpThumb/pgImg.php');
+if(!defined('PHOTOGALLERY_PGIMG_REL')) define('PHOTOGALLERY_PGIMG_REL',PHOTOGALLERY_REL.PHOTOGALLERY_PGIMG);
+if(!defined('PHOTOGALLERY_PGIMG_FILE')) define('PHOTOGALLERY_PGIMG_FILE',realpath(dirname(__FILE__).'/'.PHOTOGALLERY_PGIMG));
+if(!defined('PHOTOGALLERY_IMAGES')) define('PHOTOGALLERY_IMAGES',PHOTOGALLERY_REL.'images/');
 require_once(DOKU_PLUGIN.'syntax.php');
 require_once(DOKU_INC.'inc/search.php');
 require_once(DOKU_INC.'inc/JpegMeta.php');
-require_once('phpThumb/phpThumb.config.php');
+require_once(dirname(__FILE__).'/phpThumb/phpThumb.config.php');
+define('PGIMG_EXE_PERM',0110); // Owner and group execute permission in octal notation
 
-class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
+class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {	
 
     /**
      * What kind of syntax are we?
@@ -41,7 +46,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
      * Connect pattern to lexer
      */
     function connectTo($mode) {
-				$this->Lexer->addSpecialPattern('----+ *photogallery(?: [ a-zA-Z0-9_]*)?-+\n.*?\n----+', $mode, 'plugin_photogallery');
+				$this->Lexer->addSpecialPattern('----+ *photogallery(?: [ a-zA-Z0-9_]*)?-+\n(?:.|\n)*----+', $mode, 'plugin_photogallery');
     }
 
     /**
@@ -67,7 +72,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         $cmd = array_shift($lines);
         $cmd = str_replace('photogallery', '', $cmd);
         $cmd = trim($cmd, '- ');
-				if (!strpos('show|link',$cmd)) {
+				if (!strpos('show|link|info',$cmd)) {
 						$cmd = 'show';
 				}
 				$data['command'] = $cmd;
@@ -131,6 +136,14 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
                 }
             }
         }
+				
+				// Check phpThumb requirements
+				if ($data['phpthumb'] == true){
+						if (!$this->_phpThumbCheck()){
+								msg($this->getLang('phpthumbdisabled'),2);
+								$data['phpthumb'] = false;
+						}
+				}
 
         // parse info
         foreach($lines as $line) {
@@ -241,12 +254,17 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
     function render($mode, Doku_Renderer $R, $data){
         global $ID;
 				global $conf;
-
+				
 				$cmd = $data['command'];
         if($mode == 'xhtml'){
+
 						if($this->_auth_check($data)){
-								$R->info['cache'] &= $data['cache'];
-								$this->_photo_gallery($data, $R); // Start gallery
+								if($cmd == 'info')
+										$this->_info_page($R, $data);
+								else{
+										$R->info['cache'] &= $data['cache'];
+										$this->_photo_gallery($data, $R); // Start gallery
+								}
 						}
 						elseif($cmd == 'show')
 								$R->doc .= '<div class="nothing">'.$this->getLang('notauthorized').'</div>';
@@ -262,6 +280,93 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
             return true;
         }
         return false;
+		}
+		
+		function _phpThumbCheck(){
+				$fperm = fileperms(PHOTOGALLERY_PGIMG_FILE);
+				if (($fperm & PGIMG_EXE_PERM) != PGIMG_EXE_PERM){
+						msg($this->getLang('phpthumbexecerror'),-1);
+						if (@chmod(PHOTOGALLERY_PGIMG_FILE, $fperm | PGIMG_EXE_PERM)){
+								msg($this->getLang('phpthumbexecpermset'),1);
+								return true;
+						}
+						else{
+								msg($this->getLang('phpthumbpermseterror'),-1);
+								return false;
+						}
+				}
+				return true;
+		}
+
+		function _info_page($R, $data){
+				$R->header('PhotoGallery info page',2,0);
+				$R->table_open();
+				$this->_info_row($R,'Plugin info','Value',' ',true);
+				$info = $this->getInfo();
+				$this->_info_row($R,'Plugin version',$info['date']);
+				$this->_info_row($R,'Author',$info['author']);
+				$this->_info_row($R,'Server parameters','Value','Status',true);
+				$this->_info_row($R,'Current PHP version',phpversion());
+				$this->_info_row($R,'Running webserver',htmlentities($_SERVER['SERVER_SOFTWARE']));
+				$ok = extension_loaded('exif');
+				$this->_info_row($R,'EXIF extension',($ok ? '' : 'not').' loaded',$ok);
+				$ok = extension_loaded('curl');
+				$this->_info_row($R,'CURL extension',($ok ? '' : 'not').' loaded',$ok);
+				$ok = extension_loaded('exif');
+				$this->_info_row($R,'IMAGICK extension',($ok ? '' : 'not').' loaded',$ok);
+				$ok = extension_loaded('gd');
+				$this->_info_row($R,'GD extension',($ok ? '' : 'not').' loaded',$ok);
+				if($ok){
+						$info = gd_info();
+						foreach($info as $key => $value) {
+								$this->_info_row($R,'|-- '.$key,$value);
+						}
+				}
+				$this->_info_row($R,'phpThumb requirements','Value','Status',true);
+				$arr = array ('exec','system','shell_exec','passthru');
+				$info = explode(',',@ini_get('disable_functions'));
+				for ($i = 0; $i<count($info); $i++){
+						if (array_search($info[$i],$arr) === false){
+								array_splice($info,$i,1);
+								$i--;
+						}
+				}
+				$ok = (count($info) < count($arr));
+				$info = implode(', ',$info);
+				$this->_info_row($R,'Important disabled functions',$info,$ok);
+				$info = fileperms(PHOTOGALLERY_PGIMG_FILE) & 0xFFF;
+				$ok = (($info & PGIMG_EXE_PERM) == PGIMG_EXE_PERM);
+				$this->_info_row($R,'pgImg.php execute permissions',sprintf('%o',$info),$ok);
+				$ok = $data['phpthumb'];
+				$this->_info_row($R,'phpThumb state',($ok ? '' : 'not').' enabled');
+				$R->table_close();
+		}
+
+		function _info_row($R,$item, $value, $state = null, $header = false){
+				if ($header)
+						$R->tablethead_open();
+				$R->tablerow_open();
+				$this->_info_cell($R,$item,$header);
+				$this->_info_cell($R,$value,$header);
+				if(is_bool($state))
+						$this->_info_cell($R,$state ? "ok" : "error",$header);
+				else
+						$this->_info_cell($R,$state,$header);
+				$R->tablerow_close();
+				if ($header)
+						$R->tablethead_close();
+		}
+		
+		function _info_cell($R,$text, $header = false){
+				if ($header)
+						$R->tableheader_open();
+				else
+						$R->tablecell_open();
+				$R->cdata($text);
+				if ($header)
+						$R->tableheader_close();
+				else
+						$R->tablecell_close();
 		}
 
     /**
@@ -589,7 +694,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         $R->doc .= '<a href="'.$href.'" '.$aatt.'>'.DOKU_LF;
 				$R->doc .= '<img src="'.$src.'" '.$iatt.'/>'.DOKU_LF;
 				$R->doc .= '<div class="pg-zoom">';
-				$R->doc .= '<img src="'.DOKU_PHOTOGALLERY.'images/zoom.png">';
+				$R->doc .= '<img src="'.PHOTOGALLERY_IMAGES.'/zoom.png">';
 				$R->doc .= '</div>'.DOKU_LF;
         $R->doc .= '</a>'.DOKU_LF;
 
@@ -661,8 +766,8 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 										$tpar['fltr[0]'] = 'over|../images/video_frame.png';
 										$ipar['src'] = $tpar['src'];
 								} else{
-										$tpar['src'] = DOKU_PHOTOGALLERY.'images/video_thumb.png';
-										$ipar['src'] = DOKU_PHOTOGALLERY.'images/video_poster.jpg';;
+										$tpar['src'] = PHOTOGALLERY_IMAGES.'video_thumb.png';
+										$ipar['src'] = PHOTOGALLERY_IMAGES.'video_poster.jpg';;
 								}
 								$tpar['zc'] = 'C'; // Crop to given size
 								$vsrc = ml($img['id']);
@@ -698,8 +803,8 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 										$ipar['h'] = $mh;
 								} 
 						}
-						$isrc = htmlspecialchars(phpThumbURL($ipar, DOKU_PHOTOGALLERY.'phpThumb/pgThumb.php'));
-						$tsrc = htmlspecialchars(phpThumbURL($tpar, DOKU_PHOTOGALLERY.'phpThumb/pgThumb.php'));
+						$isrc = htmlspecialchars(phpThumbURL($ipar, PHOTOGALLERY_PGIMG_REL));
+						$tsrc = htmlspecialchars(phpThumbURL($tpar, PHOTOGALLERY_PGIMG_REL));
 				} else{ // Use Dokuwiki media link and cache
 						// prepare dimensions
 						$tdim = array('w'=>$data['tw'],'h'=>$data['th']);
@@ -722,11 +827,11 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 						$idim = array('w'=>$iw,'h'=>$ih);
 						if($img['isvid']){
 								$vsrc = ml($img['id'],$tdim);
-								$tsrc = DOKU_PHOTOGALLERY.'images/video_thumb.png';
+								$tsrc = PHOTOGALLERY_IMAGES.'video_thumb.png';
 								if($img['poster']){
 										$isrc = ml($img['poster'],$idim);
 								} else{
-										$isrc = DOKU_PHOTOGALLERY.'images/video_poster.jpg';
+										$isrc = PHOTOGALLERY_IMAGES.'video_poster.jpg';
 								}
 						} else{
 								$isrc = ml($img['id'],$idim);
