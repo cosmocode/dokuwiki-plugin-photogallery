@@ -46,7 +46,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
      * Connect pattern to lexer
      */
     function connectTo($mode) {
-				$this->Lexer->addSpecialPattern('----+ *photogallery(?: [ a-zA-Z0-9_]*)?-+\n(?:.|\n)*----+', $mode, 'plugin_photogallery');
+				$this->Lexer->addSpecialPattern('----+ *photogallery(?: [ a-zA-Z0-9_]*)?-+\n.*?\n?----+', $mode, 'plugin_photogallery');
     }
 
     /**
@@ -378,7 +378,6 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				global $ID;
 				
 				//dbg($data);
-				
         $cmd = $data['command'];
 				if (!$data['rss']){
 					if(($cmd == 'show') and (!$this->_media_folder_exists($data['ns']))){
