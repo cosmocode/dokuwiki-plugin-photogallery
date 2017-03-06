@@ -96,8 +96,8 @@ $PHPTHUMB_CONFIG['cache_default_only_suffix'] = '';           // cached in norma
 //$PHPTHUMB_CONFIG['cache_default_only_suffix'] = '*_thumb';  // cache 'pic.jpg' becomes 'pic_thumb.jpg' (or 'pic_thumb.png' if PNG output is selected, etc)
 //$PHPTHUMB_CONFIG['cache_default_only_suffix'] = 'small-*';  // cache 'pic.jpg' becomes 'small-pic.jpg' (or 'small-pic.png' if PNG output is selected, etc)
 
-$PHPTHUMB_CONFIG['cache_prefix'] = 'phpThumb_cache_'.(isset($_SERVER['SERVER_NAME']) ? str_replace('www.', '', $_SERVER['SERVER_NAME']).'_' : ''); // keep cache file separate by domain
-//$PHPTHUMB_CONFIG['cache_prefix'] = 'phpThumb_cache';                                                                                             // allow phpThumb to share 1 set of cached files even if accessed under different servername/domains on same server
+//$PHPTHUMB_CONFIG['cache_prefix'] = 'phpThumb_cache_'.(isset($_SERVER['SERVER_NAME']) ? str_replace('www.', '', $_SERVER['SERVER_NAME']).'_' : ''); // keep cache file separate by domain
+$PHPTHUMB_CONFIG['cache_prefix'] = 'phpThumb_cache';                                                                                             // allow phpThumb to share 1 set of cached files even if accessed under different servername/domains on same server
 
 $PHPTHUMB_CONFIG['cache_force_passthru'] = true;  // if true, cached image data will always be passed to browser; if false, HTTP redirect will be used instead
 
@@ -164,7 +164,7 @@ $PHPTHUMB_CONFIG['error_silent_die_on_error']   = false;    // simply die with n
 $PHPTHUMB_CONFIG['error_die_on_source_failure'] = true;     // die with error message if source image cannot be processed by phpThumb() (usually because source image is corrupt in some way). If false the source image will be passed through unprocessed, if true (default) an error message will be displayed.
 
 // * Off-server Thumbnailing Configuration:
-$PHPTHUMB_CONFIG['nohotlink_enabled']           = true;                                     // If false will allow thumbnailing from any source domain, if true then only domains in 'nohotlink_valid_domains' will be accepted
+$PHPTHUMB_CONFIG['nohotlink_enabled']           = false;                                    // If false will allow thumbnailing from any source domain, if true then only domains in 'nohotlink_valid_domains' will be accepted
 $PHPTHUMB_CONFIG['nohotlink_valid_domains']     = array(@$_SERVER['HTTP_HOST']);            // This is the list of domains for which thumbnails are allowed to be created. Note: domain only, do not include port numbers. The default value of the current domain should be fine in most cases, but if neccesary you can add more domains in here, in the format "www.example.com"
 $PHPTHUMB_CONFIG['nohotlink_erase_image']       = true;                                     // if true thumbnail is covered up with $PHPTHUMB_CONFIG['nohotlink_fill_color'] before text is applied, if false text is written over top of thumbnail
 $PHPTHUMB_CONFIG['nohotlink_text_message']      = 'Off-server thumbnailing is not allowed'; // text of error message
@@ -223,7 +223,7 @@ $PHPTHUMB_CONFIG['http_follow_redirect']            = true; // if true (default)
 
 
 // * Speed optimizations configuration
-$PHPTHUMB_CONFIG['allow_local_http_src']         = false; // If true, 'src' parameter can be "http://<thishostname>/path/image.ext" instead of just "/path/image.ext"; if false then display warning message to encourage more efficient local-filename calling.
+$PHPTHUMB_CONFIG['allow_local_http_src']         = true;  // If true, 'src' parameter can be "http://<thishostname>/path/image.ext" instead of just "/path/image.ext"; if false then display warning message to encourage more efficient local-filename calling.
 $PHPTHUMB_CONFIG['use_exif_thumbnail_for_speed'] = false; // If true, and EXIF thumbnail is available, and is larger or equal to output image dimensions, use EXIF thumbnail rather than actual source image for generating thumbnail. Benefit is only speed, avoiding resizing large image.
 
 /* END USER CONFIGURATION SECTION */
@@ -268,6 +268,35 @@ function phpThumbURL($ParameterString, $path_to_phpThumb='phpThumb.php') {
 			}
 		} else {
 			$ParamterStringEncodedArray[] = $key.'='.rawurlencode($value);
+		}
+	}
+	$ParameterString = implode($PHPTHUMB_CONFIG['high_security_url_separator'], $ParamterStringEncodedArray);
+	return $path_to_phpThumb.'?'.$ParameterString.$PHPTHUMB_CONFIG['high_security_url_separator'].'hash='.md5($ParameterString.$PHPTHUMB_CONFIG['high_security_password']);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Function for generating hashed calls to phpThumb if 'high_security_enabled'
+// example:
+//   require_once('phpThumb/phpThumb.config.php');
+//   echo '<img src="'.htmlspecialchars(phpThumbURL('src=/images/pic.jpg&w=50', '/phpThumb/phpThumb.php')).'">';
+
+function pgThumbURL($ParameterString, $path_to_phpThumb='phpThumb.php') {
+	global $PHPTHUMB_CONFIG;
+	if (is_array($ParameterString)) {
+		$ParameterStringArray = $ParameterString;
+	} else {
+		parse_str($ParameterString, $ParameterStringArray);
+	}
+	$ParamterStringEncodedArray = array();
+	foreach ($ParameterStringArray as $key => $value) {
+		if (is_array($value)) {
+			// e.g. fltr[] is passed as an array
+			foreach ($value as $subvalue) {
+				//$ParamterStringEncodedArray[] = $key.'[]='.rawurlencode($subvalue);
+				$ParamterStringEncodedArray[] = $key.'[]='.$subvalue;
+			}
+		} else {
+					$ParamterStringEncodedArray[] = $key.'='.$value;
 		}
 	}
 	$ParameterString = implode($PHPTHUMB_CONFIG['high_security_url_separator'], $ParamterStringEncodedArray);

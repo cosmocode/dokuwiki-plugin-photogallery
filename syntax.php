@@ -753,26 +753,24 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
     function _image(&$img,$data,$idx){
 				global $conf;
 				if ($data['phpthumb'] == true){
-						$tpar = array();
+						// Warning src should be the last defined parameters
 						$tpar['w'] = $data['tw'];
 						$tpar['h'] = $data['th'];
 						$ipar = array();
 						$ipar['w'] = $data['iw'];
 						$ipar['h'] = $data['ih'];
 						if($img['isvid']){
+								$tpar['zc'] = 'C'; // Crop to given size
 								if($img['poster']){
-										$tpar['src'] = DOKU_BASE.$conf['savedir'].'/media/'.idfilter($img['poster']);
 										$tpar['fltr[0]'] = 'over|../images/video_frame.png';
+										$tpar['src'] = DOKU_BASE.$conf['savedir'].'/media/'.idfilter($img['poster']);
 										$ipar['src'] = $tpar['src'];
 								} else{
 										$tpar['src'] = PHOTOGALLERY_IMAGES.'video_thumb.png';
 										$ipar['src'] = PHOTOGALLERY_IMAGES.'video_poster.jpg';;
 								}
-								$tpar['zc'] = 'C'; // Crop to given size
 								$vsrc = ml($img['id']);
 						} else{
-								$tpar['src'] = DOKU_BASE.$conf['savedir'].'/media/'.idfilter($img['id']);
-								$ipar['src'] = $tpar['src'];
 								$mw = (int) $this->_meta($img,'width');
 								$mh = (int) $this->_meta($img,'height');
 								$img_ar = ($mw > $mh ? $mw/$mh : $mh/$mw);
@@ -801,9 +799,14 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 										$ipar['w'] = $mw;
 										$ipar['h'] = $mh;
 								} 
+								if ($data['rss'])
+										$tpar['src'] = $img['id'];
+								else
+										$tpar['src'] = DOKU_BASE.$conf['savedir'].'/media/'.idfilter($img['id']);
+								$ipar['src'] = $tpar['src'];
 						}
-						$isrc = htmlspecialchars(phpThumbURL($ipar, PHOTOGALLERY_PGIMG_REL));
-						$tsrc = htmlspecialchars(phpThumbURL($tpar, PHOTOGALLERY_PGIMG_REL));
+						$isrc = htmlspecialchars(pgThumbURL($ipar, PHOTOGALLERY_PGIMG_REL));
+						$tsrc = htmlspecialchars(pgThumbURL($tpar, PHOTOGALLERY_PGIMG_REL));
 				} else{ // Use Dokuwiki media link and cache
 						// prepare dimensions
 						$tdim = array('w'=>$data['tw'],'h'=>$data['th']);
