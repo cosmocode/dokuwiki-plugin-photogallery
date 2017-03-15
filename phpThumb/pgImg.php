@@ -255,7 +255,7 @@ if (!empty($_GET['src']) && isset($_GET['md5s']) && empty($_GET['md5s'])) {
 	}
 }
 
-if (!empty($_GET['src']) && empty($phpThumb->config_allow_local_http_src) && preg_match('#^http://'.@$_SERVER['HTTP_HOST'].'(.+)#i', $_GET['src'], $matches)) {
+if (!empty($_GET['src']) && empty($phpThumb->config_allow_local_http_src) && preg_match('#^https?://'.@$_SERVER['HTTP_HOST'].'(.+)#i', $_GET['src'], $matches)) {
 	$phpThumb->ErrorImage('It is MUCH better to specify the "src" parameter as "'.$matches[1].'" instead of "'.$matches[0].'".'."\n\n".'If you really must do it this way, enable "allow_local_http_src" in phpThumb.config.php');
 }
 
@@ -274,91 +274,6 @@ if ($phpThumb->config_nooffsitelink_require_refer && !in_array(@$parsed_url_refe
 $parsed_url_src = phpthumb_functions::ParseURLbetter(@$_GET['src']);
 if ($phpThumb->config_nohotlink_enabled && $phpThumb->config_nohotlink_erase_image && preg_match('#^(f|ht)tps?://#i', @$_GET['src']) && !in_array(@$parsed_url_src['host'], $phpThumb->config_nohotlink_valid_domains)) {
 	$phpThumb->ErrorImage($phpThumb->config_nohotlink_text_message);
-}
-
-if ($phpThumb->config_mysql_query) {
-	if ($phpThumb->config_mysql_extension == 'mysqli') {
-
-		$found_missing_function = false;
-		foreach (array('mysqli_connect') as $required_mysqli_function) {
-			if (!function_exists($required_mysqli_function)) {
-				$found_missing_function = $required_mysqli_function;
-				break;
-			}
-		}
-		if ($found_missing_function) {
-			$phpThumb->ErrorImage('SQL function unavailable: '.$found_missing_function);
-		} else {
-			$mysqli = new mysqli($phpThumb->config_mysql_hostname, $phpThumb->config_mysql_username, $phpThumb->config_mysql_password, $phpThumb->config_mysql_database);
-			if ($mysqli->connect_error) {
-				$phpThumb->ErrorImage('MySQLi connect error ('.$mysqli->connect_errno.') '.$mysqli->connect_error);
-			} else {
-				if ($result = $mysqli->query($phpThumb->config_mysql_query)) {
-					if ($row = $result->fetch_array()) {
-
-						$result->free();
-						$mysqli->close();
-						$phpThumb->setSourceData($row[0]);
-						unset($row);
-
-					} else {
-						$result->free();
-						$mysqli->close();
-						$phpThumb->ErrorImage('no matching data in database.');
-					}
-				} else {
-					$mysqli->close();
-					$phpThumb->ErrorImage('Error in MySQL query: "'.$mysqli->error.'"');
-				}
-			}
-			unset($_GET['id']);
-		}
-
-	} elseif ($phpThumb->config_mysql_extension == 'mysql') {
-
-		$found_missing_function = false;
-		//foreach (array('mysql_connect', 'mysql_select_db', 'mysql_query', 'mysql_fetch_array', 'mysql_free_result', 'mysql_close', 'mysql_error') as $required_mysql_function) {
-		foreach (array('mysql_connect') as $required_mysql_function) {
-			if (!function_exists($required_mysql_function)) {
-				$found_missing_function = $required_mysql_function;
-				break;
-			}
-		}
-		if ($found_missing_function) {
-			$phpThumb->ErrorImage('SQL function unavailable: '.$found_missing_function);
-		} else {
-			if ($cid = @mysql_connect($phpThumb->config_mysql_hostname, $phpThumb->config_mysql_username, $phpThumb->config_mysql_password)) {
-				if (@mysql_select_db($phpThumb->config_mysql_database, $cid)) {
-					if ($result = @mysql_query($phpThumb->config_mysql_query, $cid)) {
-						if ($row = @mysql_fetch_array($result)) {
-
-							mysql_free_result($result);
-							mysql_close($cid);
-							$phpThumb->setSourceData($row[0]);
-							unset($row);
-
-						} else {
-							mysql_free_result($result);
-							mysql_close($cid);
-							$phpThumb->ErrorImage('no matching data in database.');
-						}
-					} else {
-						mysql_close($cid);
-						$phpThumb->ErrorImage('Error in MySQL query: "'.mysql_error($cid).'"');
-					}
-				} else {
-					mysql_close($cid);
-					$phpThumb->ErrorImage('cannot select MySQL database: "'.mysql_error($cid).'"');
-				}
-			} else {
-				$phpThumb->ErrorImage('cannot connect to MySQL server');
-			}
-			unset($_GET['id']);
-		}
-
-	} else {
-		$phpThumb->ErrorImage('config_mysql_extension not supported');
-	}
 }
 
 ////////////////////////////////////////////////////////////////
@@ -421,10 +336,10 @@ if (isset($_GET['phpThumbDebug']) && ($_GET['phpThumbDebug'] == '3')) {
 $CanPassThroughDirectly = true;
 if ($phpThumb->rawImageData) {
 	// data from SQL, should be fine
-} elseif (preg_match('#^http\://[^\\?&]+\\.(jpe?g|gif|png)$#i', $phpThumb->src)) {
+} elseif (preg_match('#^https?\://[^\\?&]+\\.(jpe?g|gif|png)$#i', $phpThumb->src)) {
 	// assume is ok to passthru if no other parameters specified
-} elseif (preg_match('#^(f|ht)tp\://#i', $phpThumb->src)) {
-	$phpThumb->DebugMessage('$CanPassThroughDirectly=false because preg_match("#^(f|ht)tp\://#i", '.$phpThumb->src.')', __FILE__, __LINE__);
+} elseif (preg_match('#^(f|ht)tps?\://#i', $phpThumb->src)) {
+	$phpThumb->DebugMessage('$CanPassThroughDirectly=false because preg_match("#^(f|ht)tps?\://#i", '.$phpThumb->src.')', __FILE__, __LINE__);
 	$CanPassThroughDirectly = false;
 } elseif (!@is_readable($phpThumb->sourceFilename)) {
 	$phpThumb->DebugMessage('$CanPassThroughDirectly=false because !@is_readable('.$phpThumb->sourceFilename.')', __FILE__, __LINE__);
@@ -442,7 +357,7 @@ foreach ($_GET as $key => $value) {
 		case 'w':
 		case 'h':
 			// might be OK if exactly matches original
-			if (preg_match('#^http\://[^\\?&]+\\.(jpe?g|gif|png)$#i', $phpThumb->src)) {
+			if (preg_match('#^https?\://[^\\?&]+\\.(jpe?g|gif|png)$#i', $phpThumb->src)) {
 				// assume it is not ok for direct-passthru of remote image
 				$CanPassThroughDirectly = false;
 			}
@@ -476,7 +391,7 @@ $phpThumb->DebugMessage('$CanPassThroughDirectly="'.intval($CanPassThroughDirect
 while ($CanPassThroughDirectly && $phpThumb->src) {
 	// no parameters set, passthru
 
-	if (preg_match('#^http\://[^\\?&]+\.(jpe?g|gif|png)$#i', $phpThumb->src)) {
+	if (preg_match('#^https?\://[^\\?&]+\.(jpe?g|gif|png)$#i', $phpThumb->src)) {
 		$phpThumb->DebugMessage('Passing HTTP source through directly as Location: redirect ('.$phpThumb->src.')', __FILE__, __LINE__);
 		header('Location: '.$phpThumb->src);
 		exit;
