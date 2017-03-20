@@ -693,7 +693,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         $R->doc .= '<a href="'.$href.'" '.$aatt.'>'.DOKU_LF;
 				$R->doc .= '<img src="'.$src.'" '.$iatt.'/>'.DOKU_LF;
 				$R->doc .= '<div class="pg-zoom">';
-				$R->doc .= '<img src="'.PHOTOGALLERY_IMAGES.'zoom.png">';
+				$R->doc .= '<img src="'.PHOTOGALLERY_IMAGES.'zoom.png" alt=""/>';
 				$R->doc .= '</div>'.DOKU_LF;
         $R->doc .= '</a>'.DOKU_LF;
 
@@ -743,7 +743,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 						$R->doc .= ' - '.$data['ziplink'];
 				}
 				$R->doc .= '</p>';
-				$R->doc .= '<p align="left"><i>'.$data['copyright'].'</i></p>'.DOKU_LF;
+				$R->doc .= '<p style="text-align:left"><i>'.$data['copyright'].'</i></p>'.DOKU_LF;
 				$R->doc .= '</div>'.DOKU_LF;
 		}
 		
@@ -873,10 +873,10 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 //				$ret .= '<img src="'.$tsrc.'" '.$tatt.'/>'.DOKU_LF;
 				}
 				else{
-						$ret .= '<img class="pg-preload" data-src="'.$tsrc.'" '.$tatt.'/>'.DOKU_LF;
+						$ret .= '<img class="pg-preload" src="" data-src="'.$tsrc.'" '.$tatt.'/>'.DOKU_LF;
 				};
 				if ($idx < 5){
-						$ret .= '<img class="pg-preload" style="display:none;" src="'.$isrc.'"/>'.DOKU_LF;
+						$ret .= '<img class="pg-preload" style="display:none;" src="'.$isrc.'" alt=""/>'.DOKU_LF;
 				};
 				$ret .= $video;
         $ret .= '</li>'.DOKU_LF;
