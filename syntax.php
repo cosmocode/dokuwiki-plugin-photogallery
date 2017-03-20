@@ -693,7 +693,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         $R->doc .= '<a href="'.$href.'" '.$aatt.'>'.DOKU_LF;
 				$R->doc .= '<img src="'.$src.'" '.$iatt.'/>'.DOKU_LF;
 				$R->doc .= '<div class="pg-zoom">';
-				$R->doc .= '<img src="'.PHOTOGALLERY_IMAGES.'/zoom.png">';
+				$R->doc .= '<img src="'.PHOTOGALLERY_IMAGES.'zoom.png">';
 				$R->doc .= '</div>'.DOKU_LF;
         $R->doc .= '</a>'.DOKU_LF;
 
