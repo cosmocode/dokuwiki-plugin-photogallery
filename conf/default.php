@@ -6,7 +6,7 @@
  * @author  Marco Nolletti
  */
 
-$conf['use_phpThumb']     = 1;
+$conf['use_phpThumb']     = 0;
 $conf['autoplay']         = 1;
 $conf['poster_width']     = 220;
 $conf['poster_height']    = 220;
