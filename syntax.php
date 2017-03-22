@@ -16,7 +16,8 @@ if(!defined('PHOTOGALLERY_IMAGES')) define('PHOTOGALLERY_IMAGES',PHOTOGALLERY_RE
 require_once(DOKU_PLUGIN.'syntax.php');
 require_once(DOKU_INC.'inc/search.php');
 require_once(DOKU_INC.'inc/JpegMeta.php');
-require_once(dirname(__FILE__).'/phpThumb/phpThumb.config.php');
+require_once('lib/array_column.php');
+require_once('phpThumb/phpThumb.config.php');
 define('PGIMG_EXE_PERM',0110); // Owner and group execute permission in octal notation
 
 class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {	
@@ -306,7 +307,8 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				$this->_info_row($R,'Plugin version',$info['date']);
 				$this->_info_row($R,'Author',$info['author']);
 				$this->_info_row($R,'Server parameters','Value','Status',true);
-				$this->_info_row($R,'Current PHP version',phpversion());
+				$ok = version_compare(PHP_VERSION,'5.4.45',">=");
+				$this->_info_row($R,'Current PHP version',phpversion(),$ok);
 				$this->_info_row($R,'Running webserver',htmlentities($_SERVER['SERVER_SOFTWARE']));
 				$ok = extension_loaded('exif');
 				$this->_info_row($R,'EXIF extension',($ok ? '' : 'not').' loaded',$ok);
@@ -763,7 +765,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 								$tpar['zc'] = 'C'; // Crop to given size
 								if($img['poster']){
 										$tpar['fltr[0]'] = 'over|../images/video_frame.png';
-										$tpar['src'] = DOKU_BASE.$conf['savedir'].'/media/'.idfilter($img['poster']);
+										$tpar['src'] = DOKU_BASE.$conf['savedir'].'/media/'.str_replace(':','/',idfilter($img['poster']));
 										$ipar['src'] = $tpar['src'];
 								} else{
 										$tpar['src'] = PHOTOGALLERY_IMAGES.'video_thumb.png';
@@ -802,7 +804,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 								if ($data['rss'])
 										$tpar['src'] = $img['id'];
 								else
-										$tpar['src'] = DOKU_BASE.$conf['savedir'].'/media/'.idfilter($img['id']);
+										$tpar['src'] = DOKU_BASE.$conf['savedir'].'/media/'.str_replace(':','/',idfilter($img['id']));
 								$ipar['src'] = $tpar['src'];
 						}
 						$isrc = htmlspecialchars(pgThumbURL($ipar, PHOTOGALLERY_PGIMG_REL));
