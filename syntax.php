@@ -765,7 +765,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 								$tpar['zc'] = 'C'; // Crop to given size
 								if($img['poster']){
 										$tpar['fltr[0]'] = 'over|../images/video_frame.png';
-										$tpar['src'] = DOKU_BASE.$conf['savedir'].'/media/'.idfilter($img['poster']);
+										$tpar['src'] = DOKU_BASE.$conf['savedir'].'/media/'.str_replace(':','/',idfilter($img['poster']));
 										$ipar['src'] = $tpar['src'];
 								} else{
 										$tpar['src'] = PHOTOGALLERY_IMAGES.'video_thumb.png';
@@ -804,7 +804,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 								if ($data['rss'])
 										$tpar['src'] = $img['id'];
 								else
-										$tpar['src'] = DOKU_BASE.$conf['savedir'].'/media/'.idfilter($img['id']);
+										$tpar['src'] = DOKU_BASE.$conf['savedir'].'/media/'.str_replace(':','/',idfilter($img['id']));
 								$ipar['src'] = $tpar['src'];
 						}
 						$isrc = htmlspecialchars(pgThumbURL($ipar, PHOTOGALLERY_PGIMG_REL));
