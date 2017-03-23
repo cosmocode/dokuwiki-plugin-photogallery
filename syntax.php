@@ -6,12 +6,14 @@
  * @author  Marco Nolletti
  */
 
-if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../').'/');
+if(!defined('DOKU_INC')) define('DOKU_INC',realpath(__DIR__.'/../../').'/');
 if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 if(!defined('PHOTOGALLERY_REL')) define('PHOTOGALLERY_REL',DOKU_REL.'lib/plugins/photogallery/');
 if(!defined('PHOTOGALLERY_PGIMG')) define('PHOTOGALLERY_PGIMG','phpThumb/pgImg.php');
 if(!defined('PHOTOGALLERY_PGIMG_REL')) define('PHOTOGALLERY_PGIMG_REL',PHOTOGALLERY_REL.PHOTOGALLERY_PGIMG);
-if(!defined('PHOTOGALLERY_PGIMG_FILE')) define('PHOTOGALLERY_PGIMG_FILE',realpath(dirname(__FILE__).'/'.PHOTOGALLERY_PGIMG));
+if(!defined('PHOTOGALLERY_PGIMG_FILE')) define('PHOTOGALLERY_PGIMG_FILE',realpath(__DIR__.'/'.PHOTOGALLERY_PGIMG));
+if(!defined('PHOTOGALLERY_MEDIA_REL')) define('PHOTOGALLERY_MEDIA_REL',DOKU_REL.$GLOBALS['conf']['savedir'].'/media/');
+if(!defined('PHOTOGALLERY_MEDIA_FILE')) define('PHOTOGALLERY_MEDIA_FILE',realpath(__DIR__.'/'.PHOTOGALLERY_MEDIA_REL));
 if(!defined('PHOTOGALLERY_IMAGES')) define('PHOTOGALLERY_IMAGES',PHOTOGALLERY_REL.'images/');
 require_once(DOKU_PLUGIN.'syntax.php');
 require_once(DOKU_INC.'inc/search.php');
@@ -765,7 +767,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 								$tpar['zc'] = 'C'; // Crop to given size
 								if($img['poster']){
 										$tpar['fltr[0]'] = 'over|../images/video_frame.png';
-										$tpar['src'] = DOKU_BASE.$conf['savedir'].'/media/'.str_replace(':','/',idfilter($img['poster']));
+										$tpar['src'] = PHOTOGALLERY_MEDIA_REL.str_replace(':','/',idfilter($img['poster']));
 										$ipar['src'] = $tpar['src'];
 								} else{
 										$tpar['src'] = PHOTOGALLERY_IMAGES.'video_thumb.png';
@@ -804,7 +806,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 								if ($data['rss'])
 										$tpar['src'] = $img['id'];
 								else
-										$tpar['src'] = DOKU_BASE.$conf['savedir'].'/media/'.str_replace(':','/',idfilter($img['id']));
+										$tpar['src'] = PHOTOGALLERY_MEDIA_REL.str_replace(':','/',idfilter($img['id']));
 								$ipar['src'] = $tpar['src'];
 						}
 						$isrc = htmlspecialchars(pgThumbURL($ipar, PHOTOGALLERY_PGIMG_REL));
