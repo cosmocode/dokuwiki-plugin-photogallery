@@ -1,26 +1,22 @@
 <?php
 /**
+ * DokuWiki Plugin photogallery (Syntax Component)
  * Embed an image gallery
  *
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author  Marco Nolletti
  */
 
-if(!defined('DOKU_INC')) define('DOKU_INC',realpath(__DIR__.'/../../').'/');
-if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
-if(!defined('PHOTOGALLERY_REL')) define('PHOTOGALLERY_REL',DOKU_REL.'lib/plugins/photogallery/');
-if(!defined('PHOTOGALLERY_PGIMG')) define('PHOTOGALLERY_PGIMG','phpThumb/pgImg.php');
-if(!defined('PHOTOGALLERY_PGIMG_REL')) define('PHOTOGALLERY_PGIMG_REL',PHOTOGALLERY_REL.PHOTOGALLERY_PGIMG);
-if(!defined('PHOTOGALLERY_PGIMG_FILE')) define('PHOTOGALLERY_PGIMG_FILE',realpath(__DIR__.'/'.PHOTOGALLERY_PGIMG));
-if(!defined('PHOTOGALLERY_MEDIA_REL')) define('PHOTOGALLERY_MEDIA_REL',DOKU_REL.$GLOBALS['conf']['savedir'].'/media/');
-if(!defined('PHOTOGALLERY_MEDIA_FILE')) define('PHOTOGALLERY_MEDIA_FILE',realpath(__DIR__.'/'.PHOTOGALLERY_MEDIA_REL));
-if(!defined('PHOTOGALLERY_IMAGES')) define('PHOTOGALLERY_IMAGES',PHOTOGALLERY_REL.'images/');
+require_once('inc/pgdefines.php');
+// must be run within Dokuwiki
+if(!defined('DOKU_INC')) die();
+
 require_once(DOKU_PLUGIN.'syntax.php');
 require_once(DOKU_INC.'inc/search.php');
 require_once(DOKU_INC.'inc/JpegMeta.php');
 require_once('lib/array_column.php');
 require_once('phpThumb/phpThumb.config.php');
-define('PGIMG_EXE_PERM',0110); // Owner and group execute permission in octal notation
+//if(!defined('PHOTOGALLERY_PGIMG_EXE_PERM')) define('PHOTOGALLERY_PGIMG_EXE_PERM',0110); // Owner and group execute permission in octal notation
 
 class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {	
 
@@ -75,7 +71,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         $cmd = array_shift($lines);
         $cmd = str_replace('photogallery', '', $cmd);
         $cmd = trim($cmd, '- ');
-				if (!strpos('show|link|info',$cmd)) {
+				if (!strpos('show|link',$cmd)) {
 						$cmd = 'show';
 				}
 				$data['command'] = $cmd;
@@ -262,12 +258,8 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         if($mode == 'xhtml'){
 
 						if($this->_auth_check($data)){
-								if($cmd == 'info')
-										$this->_info_page($R, $data);
-								else{
-										$R->info['cache'] &= $data['cache'];
-										$this->_photo_gallery($data, $R); // Start gallery
-								}
+								$R->info['cache'] &= $data['cache'];
+								$this->_photo_gallery($data, $R); // Start gallery
 						}
 						elseif($cmd == 'show')
 								$R->doc .= '<div class="nothing">'.$this->getLang('notauthorized').'</div>';
@@ -287,9 +279,9 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 		
 		function _phpThumbCheck(){
 				$fperm = fileperms(PHOTOGALLERY_PGIMG_FILE);
-				if (($fperm & PGIMG_EXE_PERM) != PGIMG_EXE_PERM){
+				if (($fperm & PHOTOGALLERY_PGIMG_EXE_PERM) != PHOTOGALLERY_PGIMG_EXE_PERM){
 						msg($this->getLang('phpthumbexecerror'),-1);
-						if (@chmod(PHOTOGALLERY_PGIMG_FILE, $fperm | PGIMG_EXE_PERM)){
+						if (@chmod(PHOTOGALLERY_PGIMG_FILE, $fperm | PHOTOGALLERY_PGIMG_EXE_PERM)){
 								msg($this->getLang('phpthumbexecpermset'),1);
 								return true;
 						}
@@ -299,78 +291,6 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 						}
 				}
 				return true;
-		}
-
-		function _info_page($R, $data){
-				$R->header('PhotoGallery info page',2,0);
-				$R->table_open();
-				$this->_info_row($R,'Plugin info','Value',' ',true);
-				$info = $this->getInfo();
-				$this->_info_row($R,'Plugin version',$info['date']);
-				$this->_info_row($R,'Author',$info['author']);
-				$this->_info_row($R,'Server parameters','Value','Status',true);
-				$ok = version_compare(PHP_VERSION,'5.4.45',">=");
-				$this->_info_row($R,'Current PHP version',phpversion(),$ok);
-				$this->_info_row($R,'Running webserver',htmlentities($_SERVER['SERVER_SOFTWARE']));
-				$ok = extension_loaded('exif');
-				$this->_info_row($R,'EXIF extension',($ok ? '' : 'not').' loaded',$ok);
-				$ok = extension_loaded('curl');
-				$this->_info_row($R,'CURL extension',($ok ? '' : 'not').' loaded',$ok);
-				$ok = extension_loaded('exif');
-				$this->_info_row($R,'IMAGICK extension',($ok ? '' : 'not').' loaded',$ok);
-				$ok = extension_loaded('gd');
-				$this->_info_row($R,'GD extension',($ok ? '' : 'not').' loaded',$ok);
-				if($ok){
-						$info = gd_info();
-						foreach($info as $key => $value) {
-								$this->_info_row($R,'|-- '.$key,$value);
-						}
-				}
-				$this->_info_row($R,'phpThumb requirements','Value','Status',true);
-				$arr = array ('exec','system','shell_exec','passthru');
-				$info = explode(',',@ini_get('disable_functions'));
-				for ($i = 0; $i<count($info); $i++){
-						if (array_search($info[$i],$arr) === false){
-								array_splice($info,$i,1);
-								$i--;
-						}
-				}
-				$ok = (count($info) < count($arr));
-				$info = implode(', ',$info);
-				$this->_info_row($R,'Important disabled functions',$info,$ok);
-				$info = fileperms(PHOTOGALLERY_PGIMG_FILE) & 0xFFF;
-				$ok = (($info & PGIMG_EXE_PERM) == PGIMG_EXE_PERM);
-				$this->_info_row($R,'pgImg.php execute permissions',sprintf('%o',$info),$ok);
-				$ok = $data['phpthumb'];
-				$this->_info_row($R,'phpThumb state',($ok ? '' : 'not').' enabled');
-				$R->table_close();
-		}
-
-		function _info_row($R,$item, $value, $state = null, $header = false){
-				if ($header)
-						$R->tablethead_open();
-				$R->tablerow_open();
-				$this->_info_cell($R,$item,$header);
-				$this->_info_cell($R,$value,$header);
-				if(is_bool($state))
-						$this->_info_cell($R,$state ? "ok" : "error",$header);
-				else
-						$this->_info_cell($R,$state,$header);
-				$R->tablerow_close();
-				if ($header)
-						$R->tablethead_close();
-		}
-		
-		function _info_cell($R,$text, $header = false){
-				if ($header)
-						$R->tableheader_open();
-				else
-						$R->tablecell_open();
-				$R->cdata($text);
-				if ($header)
-						$R->tableheader_close();
-				else
-						$R->tablecell_close();
 		}
 
     /**
@@ -402,12 +322,15 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         }
 
 				// in not exists create in the media folder a zip file containing all the images and link it
-				if (isset($data['zipfile'])){
-						$zip = $data['ns'].":".$data['zipfile'];
-						$this->_createzipfile($files, mediaFN($zip));
-						$data['ziplink'] = $R->internalmedia($zip,$this->getLang('lnk_download'),null,null,null,null,'linkonly',true);
-				}
-
+				if (isset($data['zipfile']))
+						if (class_exists('ZipArchive')){
+								$zip = $data['ns'].":".$data['zipfile'];
+								$this->_createzipfile($files, mediaFN($zip));
+								$data['ziplink'] = $R->internalmedia($zip,$this->getLang('lnk_download'),null,null,null,null,'linkonly',true);
+						}
+						else
+							msg($this->getLang('zipdisabled'),2);
+								
 				// output pg-container
 				$R->doc .= '<div class="pg-container">'.DOKU_LF;
 				

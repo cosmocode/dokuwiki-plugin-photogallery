@@ -16,3 +16,7 @@ $lang['phpthumbexecerror'] = 'PhotoGallery error: pgImg.php is not executable';
 $lang['phpthumbexecpermset'] = 'Successfully set execute permission for pgImg.php';
 $lang['phpthumbpermseterror'] = 'Unable to set execute permission for pgImg.php';
 $lang['phpthumbdisabled'] = 'Warning, phpThumb cannot be used; please disable it in plugin configuration to suppress error messages';
+$lang['zipdisabled'] = 'Cannot create archive because ZIP estension is not loaded';
+
+// menu entry for admin plugins
+$lang['menu'] = 'PhotoGallery info page';

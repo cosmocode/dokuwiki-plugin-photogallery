@@ -16,3 +16,7 @@ $lang['phpthumbexecerror'] = 'PhotoGallery Fehler: pgImg.php ist nicht ausführba
 $lang['phpthumbexecpermset'] = 'Ausführberechtigung für pgImg.php erfolgreich gesetzt';
 $lang['phpthumbpermseterror'] = 'Kann nicht Ausführberechtigung für pgImg.php setzen';
 $lang['phpthumbdisabled'] = 'Warnung, phpThumb kann nicht verwendet werden; bitte deaktivieren Sie es in der Plugin-Konfiguration um die Fehlermeldungen zu unterdrücken';
+$lang['zipdisabled'] = 'Kann kein Archiv erstellen, da die ZIP-Erweiterung nicht geladen ist';
+
+// menu entry for admin plugins
+$lang['menu'] = 'PhotoGallery Info Seite';

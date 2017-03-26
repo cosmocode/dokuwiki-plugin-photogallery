@@ -16,3 +16,7 @@ $lang['phpthumbexecerror'] = 'Errore PhotoGallery: pgImg.php non ha i permessi d
 $lang['phpthumbexecpermset'] = 'Permessi di esecuzione per pgImg.php impostati con successo';
 $lang['phpthumbpermseterror'] = 'Impossibile impostare i permessi di esecuzione per pgImg.php';
 $lang['phpthumbdisabled'] = 'Attenzione, phpThumb non pu&ograve; essere usato; disabilitalo nella configurazione del plugin per sopprimere i messaggi di errore';
+$lang['zipdisabled'] = 'Non posso creare il file di archivio perch&eacute; l\'estensione ZIP non &egrave; attiva';
+
+// menu entry for admin plugins
+$lang['menu'] = 'Informazioni su PhotoGallery';
