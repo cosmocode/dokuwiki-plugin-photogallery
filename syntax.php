@@ -262,9 +262,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 								$this->_photo_gallery($data, $R); // Start gallery
 						}
 						elseif($cmd == 'show')
-								$R->doc .= '<div class="nothing">'.$this->getLang('notauthorized').'</div>';
-						elseif($cmd == 'link')
-								dbg($this->getLang('notauthorized'));
+								msg(sprintf($this->getLang('notauthorized'),$data['ns']),-1);
 						return true;
         }elseif($mode == 'metadata'){ // NOM da rivedere
             $rel = p_get_metadata($ID,'relation',METADATA_RENDER_USING_CACHE);

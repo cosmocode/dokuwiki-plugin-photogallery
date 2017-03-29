@@ -9,7 +9,7 @@
 $lang['imagescnt'] = '%s immagini';
 $lang['videoscnt'] = '%s video';
 $lang['lnk_download'] = 'Scarica';
-$lang['notauthorized'] = 'Mi dispiace, non sei autorizzato a vedere questa galleria di foto.';
+$lang['notauthorized'] = 'Mi dispiace, non sei autorizzato a vedere la galleria di foto in <b>%s</b>.';
 $lang['nsnotexists'] = 'Attenzione, la cartella relativa al namespace <b>%s</b> non esiste.';
 $lang['pgnotexists'] = 'Attenzione, la pagina <b>%s</b> non esiste.';
 $lang['phpthumbexecerror'] = 'Errore PhotoGallery: pgImg.php non ha i permessi di esecuzione';
