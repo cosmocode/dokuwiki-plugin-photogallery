@@ -762,7 +762,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 								}
 						} else{
 								$isrc = ml($img['id'],$idim);
-								$tsrc = $isrc;
+								$tsrc = ml($img['id'],$tdim);
 						};
 
 						//prepare image attributes
