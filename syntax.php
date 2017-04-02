@@ -685,9 +685,9 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 						$ipar['w'] = $data['iw'];
 						$ipar['h'] = $data['ih'];
 						if($img['isvid']){
-								$tpar['zc'] = 'C'; // Crop to given size
+								$otpar['zc'] = 'C'; // Crop to given size
 								if($img['poster']){
-										$tpar['fltr[0]'] = 'over|../images/video_frame.png';
+										$otpar['fltr[0]'] = 'over|../images/video_frame.png';
 										$tpar['src'] = PHOTOGALLERY_MEDIA_REL.str_replace(':','/',idfilter($img['poster']));
 										$ipar['src'] = $tpar['src'];
 								} else{
@@ -702,36 +702,52 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 								if (preg_match('/([0-9]+):([0-9]+)/',$data['panar'],$matches))
 									$max_ar = $matches[1]/$matches[2];
 								if ($img_ar > $max_ar){ // Test for panorama aspect ratio
-										$tpar['far'] = 1; // Force aspect ratio
+										$otpar['far'] = 1; // Force aspect ratio
 										if ($mw > $mh){ // Landscape
 												$tpar['w'] = floor($data['th'] * 0.6 * $img_ar);
 												$cropw = floor(($tpar['w'] - $data['tw']) / 2);
-												$tpar['fltr[0]'] = "crop|$cropw|$cropw";
-												$tpar['fltr[1]'] = 'over|../images/pano_landscape.png';
+												$otpar['fltr[0]'] = "crop|$cropw|$cropw";
+												$otpar['fltr[1]'] = 'over|../images/pano_landscape.png';
 										} else{ // Portrait or square
 												$tpar['h'] = floor($data['tw'] * 0.6 * $img_ar);
 												$croph = floor(($tpar['h'] - $data['th']) / 2);
-												$tpar['fltr[0]'] = "crop|0|0|$croph|$croph";
-												$tpar['fltr[1]'] = 'over|../images/pano_portrate.png';
+												$otpar['fltr[0]'] = "crop|0|0|$croph|$croph";
+												$otpar['fltr[1]'] = 'over|../images/pano_portrate.png';
 										}
 										$ipar['w'] = $data['panw'];
 										$ipar['h'] = $data['panh'];
 								} else{  // Normal image
-										$tpar['zc'] = 'C'; // Crop to given size
+										$otpar['zc'] = 'C'; // Crop to given size
 								}
 								if ($img['fullsize']){  // Override image size for fullsize
-										$tpar['fltr[2]'] = 'over|../images/image_fullsize.png';
+										$otpar['fltr[2]'] = 'over|../images/image_fullsize.png';
 										$ipar['w'] = $mw;
 										$ipar['h'] = $mh;
 								} 
 								if ($data['rss'])
-										$tpar['src'] = $img['id'];
+										// $tpar['src'] = $img['id'];
+										$tpar['media'] = $img['id'];
 								else
-										$tpar['src'] = PHOTOGALLERY_MEDIA_REL.str_replace(':','/',idfilter($img['id']));
-								$ipar['src'] = $tpar['src'];
+										// $tpar['src'] = PHOTOGALLERY_MEDIA_REL.str_replace(':','/',idfilter($img['id']));
+										$tpar['media'] = idfilter($img['id']);
+								$ipar['media'] = $tpar['media'];
 						}
-						$isrc = htmlspecialchars(pgThumbURL($ipar, PHOTOGALLERY_PGIMG_REL));
-						$tsrc = htmlspecialchars(pgThumbURL($tpar, PHOTOGALLERY_PGIMG_REL));
+						// $isrc = htmlspecialchars(pgThumbURL($ipar, PHOTOGALLERY_PGIMG_REL));
+						$isrc = PHOTOGALLERY_PGIMG_REL.'?'. buildURLparams($ipar, '&').'&tok='.media_get_token($img['id'],$ipar['w'],$ipar['h']);
+						// $tsrc = htmlspecialchars(pgThumbURL($tpar, PHOTOGALLERY_PGIMG_REL));
+						//$tpar['opt'] = '';
+						foreach ($otpar as $key => $value){
+								$otpar[$key] = $key.'='.$value;
+						}
+						$tpar['opt'] = implode('!',$otpar);
+						//$tsrc = PHOTOGALLERY_PGIMG_REL.'?'. buildURLparams($tpar, '&').'&tok='.media_get_token($img['id'],$tpar['w'],$tpar['h']);
+								$tsrc = PHOTOGALLERY_PGIMG_REL.'?';
+								foreach ($tpar as $key => $value) {
+										$tsrc .= $key.'='.$value.'&';
+								}
+								$tsrc .= 'tok='.media_get_token($img['id'],$tpar['w'],$tpar['h']);
+								//msg($tsrc);
+
 				} else{ // Use Dokuwiki media link and cache
 						// prepare dimensions
 						$tdim = array('w'=>$data['tw'],'h'=>$data['th']);
@@ -762,7 +778,13 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 								}
 						} else{
 								$isrc = ml($img['id'],$idim);
-								$tsrc = $isrc;
+								// $tsrc = ml($img['id'],$tdim);
+								$tw = $data['tw'];
+								$th = $data['th'];
+								$tpar['media'] = idfilter($img['id']);
+								$tpar['w'] = $tw;
+								$tpar['h'] = $th;
+								$tsrc = PHOTOGALLERY_PGIMG_REL.'?'. buildURLparams($tpar, '&').'&tok='.media_get_token($img['id'],$tw,$th);
 						};
 
 						//prepare image attributes
