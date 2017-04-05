@@ -1,30 +1,37 @@
 <?php
 /**
- * DokuWiki media passthrough file
+ * PhotoGallery media passthrough file
  *
- * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
- * @author     Andreas Gohr <andi@splitbrain.org>
+ * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * @author  Marco Nolletti
  */
+if(!defined('DOKU_INC')) define('DOKU_INC', realpath(__DIR__.'/../../../').'/');
+require_once('inc/pgdefines.php');
+// must be run within Dokuwiki
+if(!defined('DOKU_INC')) die();
 
-if(!defined('DOKU_INC')) define('DOKU_INC', realpath(dirname(__FILE__).'/../../../../').'/');
 if (!defined('DOKU_DISABLE_GZIP_OUTPUT')) define('DOKU_DISABLE_GZIP_OUTPUT', 1);
 require_once(DOKU_INC.'inc/init.php');
-session_write_close(); //close session
-
 require_once(DOKU_INC.'inc/fetch.functions.php');
+require_once('phpThumb/phpthumb.class.php');
+session_write_close(); //close session
 
 if (defined('SIMPLE_TEST')) {
     $INPUT = new Input();
 }
 
 // BEGIN main
-    $mimetypes = getMimeTypes();
+$WIDTH  = $INPUT->int('w');
+$HEIGHT = $INPUT->int('h');
+$CACHE  = calc_cache($INPUT->str('cache'));
+$OPT = $INPUT->str('opt'); // phpThumb options
+
+$mimetypes = getMimeTypes();
+
+if(!$INPUT->str('src')){
 
     //get input
     $MEDIA  = stripctl(getID('media', false)); // no cleaning except control chars - maybe external
-    $CACHE  = calc_cache($INPUT->str('cache'));
-    $WIDTH  = $INPUT->int('w');
-    $HEIGHT = $INPUT->int('h');
     $REV    = & $INPUT->ref('rev');
     //sanitize revision
     $REV = preg_replace('/[^0-9]/', '', $REV);
@@ -77,17 +84,8 @@ if (defined('SIMPLE_TEST')) {
     $evt->advise_after();
     unset($evt);
 
-    //handle image resizing/cropping
-    // if((substr($MIME, 0, 5) == 'image') && ($WIDTH || $HEIGHT)) {
-        // if($HEIGHT && $WIDTH) {
-            // $data['file'] = $FILE = media_crop_image($data['file'], $EXT, $WIDTH, $HEIGHT);
-        // } else {
-            // $data['file'] = $FILE = media_resize_image($data['file'], $EXT, $WIDTH, $HEIGHT);
-        // }
-    // }
-		
+    //handle image resizing/cropping/phpThumbing
     if((substr($MIME, 0, 5) == 'image') && ($WIDTH || $HEIGHT)) {
-				$OPT = $INPUT->str('opt'); // phpThumb options
 				if ($OPT){
 						$data['file'] = $FILE = media_photogallery_image($data['file'],$EXT,$WIDTH,$HEIGHT,$OPT);
 				} else {
@@ -108,19 +106,62 @@ if (defined('SIMPLE_TEST')) {
     }
     // Do something after the download finished.
     $evt->advise_after();  // will not be emitted on 304 or x-sendfile
-
+} else{
+		$FILE = PHOTOGALLERY_IMAGES_FILE.$INPUT->str('src');
+		list($EXT, $MIME, $DL) = mimetype($FILE, false);
+		list($STATUS, $STATUSMESSAGE) = checkLocalFileStatus($FILE, $WIDTH, $HEIGHT);
+		// // send any non 200 status
+		if($STATUS != 200) {
+				http_status($STATUS, $STATUSMESSAGE);
+		}
+		if ($OPT)
+				$FILE = media_photogallery_image($FILE,$EXT,$WIDTH,$HEIGHT,$OPT);
+		else
+				$FILE = media_crop_image($FILE, $EXT, $WIDTH, $HEIGHT);
+		sendFile($FILE, $MIME, $DL, $CACHE, false, $FILE);
+}
 
 // END DO main
 
+/**
+ * Check local image file for preconditions and return correct status code
+ *
+ * READ: MIME, EXT, CACHE
+ * WRITE: FILE, array( STATUS, STATUSMESSAGE )
+ *
+ * @author Marco Nolletti
+ *
+ * @param string $file   reference to the file variable
+ * @param int    $width
+ * @param int    $height
+ * @return array as array(STATUS, STATUSMESSAGE)
+ */
+function checkLocalFileStatus($file, $width=0, $height=0) {
+    global $MIME, $EXT, $CACHE, $INPUT;
+
+    //media to local file
+		if(empty($file)) {
+				return array(400, 'Bad request');
+		}
+		// check token for resized images
+		if (($width || $height) && media_get_token($file, $width, $height) !== $INPUT->str('tok')) {
+				return array(412, 'Precondition Failed');
+		}
+
+    //check file existance
+    if(!file_exists($file)) {
+        return array(404, 'Not Found');
+    }
+
+    return array(200, null);
+}
+
 function media_photogallery_image($file, $ext, $w, $h, $opt){	
-	require_once('phpthumb.class.php');
 	
 	//die();
 	// create phpThumb object
 	$phpThumb = new phpThumb();
 
-	// create 3 sizes of thumbnail
-	//$thumbnail_widths = array(160, 320, 640);
 	$capture_raw_data = false; // set to true to insert to database rather than render to screen or file (see below)
 	// this is very important when using a single object to process multiple images
 	$phpThumb->resetObject();
@@ -147,15 +188,15 @@ function media_photogallery_image($file, $ext, $w, $h, $opt){
 		foreach (explode('!',$opt) as $par) {
 				preg_match('/^(.+)=(.+)$/', $par, $options);
 				//echo $options[1]. "->" . $options[2];
-				if (preg_match('/^([a-z]+)\[(.+)\]$/', $options[1], $filters)){
-					//$fltr[$filters[1]] = $filters[2];
-					$phpThumb->setParameter($filters[1],$options[2]);
-					//echo $filters[1].'='.$options[2];
-					}
-				else{
+				// if (preg_match('/^([a-z]+)\[(.+)\]$/', $options[1], $filters)){
+					// //$fltr[$filters[1]] = $filters[2];
+					// $phpThumb->setParameter($filters[1],$options[2]);
+					// //echo $filters[1].'='.$options[2];
+					// }
+				// else{
 						$phpThumb->setParameter($options[1], $options[2]);
 						//echo $options[1].'='. $options[2];
-				}
+				// }
 		}
 	//	if (count($fltr) > 0)
 		//		$phpThumb->setParameter('fltr[]', $fltr);
@@ -170,8 +211,6 @@ function media_photogallery_image($file, $ext, $w, $h, $opt){
 	$phpThumb->setParameter('config_prefer_imagemagick', true);
 	$phpThumb->setParameter('config_disable_debug',true);
 	$phpThumb->setParameter('config_cache_directory',null);
-
-
 
 	// generate & output thumbnail
 	//$local = getCacheName($file,'.media.'.$cw.'x'.$ch.'.crop.'.$ext);
