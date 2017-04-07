@@ -204,7 +204,7 @@ function media_photogallery_image($file, $ext, $w, $h, $opt){
 
 	// set options (see phpThumb.config.php)
 	// here you must preface each option with "config_"
-	$phpThumb->setParameter('config_output_format', 'jpeg');
+	$phpThumb->setParameter('config_output_format', 'jpg');
 	$phpThumb->setParameter('config_imagemagick_path', '/usr/local/bin/convert');
 	//$phpThumb->setParameter('config_allow_src_above_docroot', true); // needed if you're working outside DOCUMENT_ROOT, in a temp dir for example
 	$phpThumb->setParameter('config_temp_directory', DOKU_INC.'data/cache/');

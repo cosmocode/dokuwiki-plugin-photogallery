@@ -675,116 +675,118 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
      */
     function _image(&$img,$data,$idx){
 				global $conf;
+				$tpar = array();
+				$ipar = array();
 				$ID = $img['id'];
-				if ($data['phpthumb'] == true){
-						// Warning src should be the last defined parameters
-						$tpar['w'] = $data['tw'];
-						$tpar['h'] = $data['th'];
-						$ipar = array();
-						$ipar['w'] = $data['iw'];
-						$ipar['h'] = $data['ih'];
-						if($img['isvid']){
+				$tw = $data['tw'];
+				$th = $data['th'];
+				//if ($data['phpthumb'] == true){
+				// if (true){
+				$iw = $data['iw'];
+				$ih = $data['ih'];
+				// NOM evitare l'uso della cache quando le dimensioni sono come le originali
+				// NOM Capire perchè non viene fatto il crop in entrambi i casi
+				if($img['isvid']){
+						$vsrc = ml($ID);
+						//$vsrc = ml($ID,$tdim);
+						$opt = 'zc=C'; // Crop to given size
+						if($img['poster']){
+								$ID = $img['poster'];
+								$opt .= '!fltr=over|../images/video_frame.png';
+								$ipar['src'] = $tpar['src'];
+						} else{
+								$tpar['src'] = 'video_thumb.png';
+								$ipar['src'] = 'video_poster.jpg';;
+						}
+				} else{
+						$mw = (int) $this->_meta($img,'width');
+						$mh = (int) $this->_meta($img,'height');
+						$img_ar = ($mw > $mh ? $mw/$mh : $mh/$mw);
+						if (preg_match('/([0-9]+):([0-9]+)/',$data['panar'],$matches))
+								$max_ar = $matches[1]/$matches[2];
+						if ($img_ar > $max_ar){ // Test for panorama aspect ratio
+								$opt = 'far=1'; // Force aspect ratio
+								if ($mw > $mh){ // Landscape
+										$tw = floor($data['th'] * 0.6 * $img_ar);
+										$cropw = floor(($tw - $data['tw']) / 2);
+										$opt .= "!fltr=crop|$cropw|$cropw";
+										$opt .= '!fltr=over|../images/pano_landscape.png';
+								} else{ // Portrait or square
+										$th = floor($data['tw'] * 0.6 * $img_ar);
+										$croph = floor(($th - $data['th']) / 2);
+										$opt .= "!fltr=crop|0|0|$croph|$croph";
+										$opt .= '!fltr=over|../images/pano_portrate.png';
+								}
+								$iw = $data['panw'];
+								$ih = $data['panh'];
+						} else{  // Normal image
 								$opt = 'zc=C'; // Crop to given size
-								if($img['poster']){
-										$ID = $img['poster'];
-										$opt .= '!fltr=over|../images/video_frame.png';
-										//$tpar['media'] = PHOTOGALLERY_MEDIA_REL.str_replace(':','/',idfilter($ID));
-										$tpar['media'] = idfilter($ID);
-										$ipar['src'] = $tpar['src'];
-								} else{
-										$tpar['src'] = 'video_thumb.png';
-										$ipar['src'] = 'video_poster.jpg';;
-								}
-								$vsrc = ml($img['id']);
-						} else{
-								$mw = (int) $this->_meta($img,'width');
-								$mh = (int) $this->_meta($img,'height');
-								$img_ar = ($mw > $mh ? $mw/$mh : $mh/$mw);
-								if (preg_match('/([0-9]+):([0-9]+)/',$data['panar'],$matches))
-									$max_ar = $matches[1]/$matches[2];
-								if ($img_ar > $max_ar){ // Test for panorama aspect ratio
-										$opt = 'far=1'; // Force aspect ratio
-										if ($mw > $mh){ // Landscape
-												$tpar['w'] = floor($data['th'] * 0.6 * $img_ar);
-												$cropw = floor(($tpar['w'] - $data['tw']) / 2);
-												$opt .= "!fltr=crop|$cropw|$cropw";
-												$opt .= '!fltr=over|../images/pano_landscape.png';
-										} else{ // Portrait or square
-												$tpar['h'] = floor($data['tw'] * 0.6 * $img_ar);
-												$croph = floor(($tpar['h'] - $data['th']) / 2);
-												$opt .= "!fltr=crop|0|0|$croph|$croph";
-												$opt .= '!fltr=over|../images/pano_portrate.png';
-										}
-										$ipar['w'] = $data['panw'];
-										$ipar['h'] = $data['panh'];
-								} else{  // Normal image
-										$opt = 'zc=C'; // Crop to given size
-								}
-								if ($img['fullsize']){  // Override image size for fullsize
-										$opt .= '!fltr=over|../images/image_fullsize.png';
-										$ipar['w'] = $mw;
-										$ipar['h'] = $mh;
-								} 
-								if ($data['rss'])
-										// $tpar['src'] = $img['id'];
-										$tpar['media'] = $ID;
-								else
-										// $tpar['src'] = PHOTOGALLERY_MEDIA_REL.str_replace(':','/',idfilter($img['id']));
-										$tpar['media'] = idfilter($ID);
-								$ipar['media'] = $tpar['media'];
 						}
-						// $isrc = htmlspecialchars(pgThumbURL($ipar, PHOTOGALLERY_PGIMG_REL));
-						$isrc = PHOTOGALLERY_PGIMG_REL.'?'. buildURLparams($ipar,'&amp;').'&tok='.media_get_token($ID,$ipar['w'],$ipar['h']);
-						// $tsrc = htmlspecialchars(pgThumbURL($tpar, PHOTOGALLERY_PGIMG_REL));
-						$tpar['opt'] = $opt;
-						$tsrc = PHOTOGALLERY_PGIMG_REL.'?'. buildURLparams($tpar,'&amp;').'&tok='.media_get_token($ID,$tpar['w'],$tpar['h']);
-				} else{ // Use Dokuwiki media link and cache
-						// prepare dimensions
-						$tdim = array('w'=>$data['tw'],'h'=>$data['th']);
-						if ($img['fullsize']){
-								$cropw = (int) $this->_meta($img,'width');
-								$croph = (int) $this->_meta($img,'height');
-						} else{
-								$cropw = $data['iw'];
-								$croph = $data['ih'];
+						if ($img['fullsize']){  // Override image size for fullsize
+								$opt .= '!fltr=over|../images/image_fullsize.png';
+								$iw = $mw;
+								$ih = $mh;
 						} 
-						$iw = (int) $this->_meta($img,'width');
-						$ih = (int) $this->_meta($img,'height');
-						$idim = array();
-						// crop to lightbox dimensions
-						if($iw > $cropw || $ih > $croph){
-								$ratio = $this->_ratio($img,$cropw,$croph);
-								$iw = floor($iw * $ratio);
-								$ih = floor($ih * $ratio);
-						}
-						$idim = array('w'=>$iw,'h'=>$ih);
-						if($img['isvid']){
-								$vsrc = ml($img['id'],$tdim);
-								$tsrc = PHOTOGALLERY_IMAGES.'video_thumb.png';
-								if($img['poster']){
-										$isrc = ml($img['poster'],$idim);
-								} else{
-										$isrc = PHOTOGALLERY_IMAGES.'video_poster.jpg';
-								}
-						} else{
-								$isrc = ml($img['id'],$idim);
-								// $tsrc = ml($img['id'],$tdim);
-								$tw = $data['tw'];
-								$th = $data['th'];
-								$tpar['media'] = idfilter($img['id']);
-								$tpar['w'] = $tw;
-								$tpar['h'] = $th;
-								$tsrc = PHOTOGALLERY_PGIMG_REL.'?'. buildURLparams($tpar,'&amp;').'&tok='.media_get_token($img['id'],$tw,$th);
-						};
-
-						//prepare image attributes
-						// $ia  = array();
-						// $ia['width'] = $iw;
-						// $ia['height'] = $ih;
-						// $ia['border'] = 0;
-						// $ia['title'] = $this->_caption($img,$data);
-						// $iatt = buildAttributes($ia); //NOM not used yet
 				}
+				// } else{ // Use Dokuwiki media link and cache
+						// // // prepare dimensions
+						// // if ($img['fullsize']){
+								// // $cropw = (int) $this->_meta($img,'width');
+								// // $croph = (int) $this->_meta($img,'height');
+						// // } else{
+								// // $cropw = $data['iw'];
+								// // $croph = $data['ih'];
+						// // } 
+						// // $iw = (int) $this->_meta($img,'width');
+						// // $ih = (int) $this->_meta($img,'height');
+						// // // crop to lightbox dimensions
+						// // if($iw > $cropw || $ih > $croph){
+								// // $ratio = $this->_ratio($img,$cropw,$croph);
+								// // $iw = floor($iw * $ratio);
+								// // $ih = floor($ih * $ratio);
+						// // }
+						// // // $ipar['w'] = $iw;
+						// // // $ipar['h'] = $ih;
+						// // if($img['isvid']){
+								// // $vsrc = ml($ID,$tdim);
+								// // $tsrc = PHOTOGALLERY_IMAGES.'video_thumb.png';
+								// // if($img['poster']){
+										// // $ID = $img['poster'];
+										// // $ipar['src'] = $tpar['src'];
+								// // } else{
+										// // $tpar['src'] = 'video_thumb.png';
+										// // $ipar['src'] = 'video_poster.jpg';;
+								// // }
+						// // } else{
+								// // // $tpar['w'] = $tw;
+								// // // $tpar['h'] = $th;
+						// // }
+
+						// // //prepare image attributes
+						// // // $ia  = array();
+						// // // $ia['width'] = $iw;
+						// // // $ia['height'] = $ih;
+						// // // $ia['border'] = 0;
+						// // // $ia['title'] = $this->_caption($img,$data);
+						// // // $iatt = buildAttributes($ia); //NOM not used yet
+				// }
+				$tpar['w'] = $tw;
+				$tpar['h'] = $th;
+				$ipar['w'] = $iw;
+				$ipar['h'] = $ih;
+				if ($data['rss'])
+						$tpar['media'] = $ID;
+				else
+						$tpar['media'] = idfilter($ID);
+				$ipar['media'] = $tpar['media'];
+				if ($data['phpthumb'] == true)
+						$tpar['opt'] = $opt;
+				$ipar['tok'] = media_get_token($ID,$iw,$ih);
+				$tpar['tok'] = media_get_token($ID,$tw,$th);
+				// $isrc = htmlspecialchars(pgThumbURL($ipar, PHOTOGALLERY_PGIMG_REL));
+				$isrc = PHOTOGALLERY_PGIMG_REL.'?'. buildURLparams($ipar,'&amp;');
+				// $tsrc = htmlspecialchars(pgThumbURL($tpar, PHOTOGALLERY_PGIMG_REL));
+				$tsrc = PHOTOGALLERY_PGIMG_REL.'?'. buildURLparams($tpar,'&amp;');
 				// prepare attributes
 				$ta = array();
 				$ta['alt'] = $this->_caption($img,$data);
