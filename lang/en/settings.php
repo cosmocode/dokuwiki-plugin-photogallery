@@ -14,6 +14,7 @@ $lang['thumbnail_width']  = 'Thumbnail image width';
 $lang['thumbnail_height'] = 'Thumbnail image height';
 $lang['image_width']      = 'Image width';
 $lang['image_height']     = 'Image height';
+$lang['viewport_rotate']  = 'Rotate viewport for portrate images';
 $lang['panorama_ratio']   = 'Consider the image as panorama if the aspect ratio is greater than the parameter (A:B con A>B)';
 $lang['panorama_width']   = 'Panoramic image width';
 $lang['panorama_height']  = 'Panoramic image height';
@@ -27,7 +28,6 @@ $lang['sort_o_title'] = 'Sort by EXIF title';
 $lang['sort_o_random'] = 'Sort randomly';
 
 $lang['options'] = 'Additional default options';
-$lang['options_o_cache'] = 'Cache';
 $lang['options_o_crop'] = 'Crop';
 $lang['options_o_reverse'] = 'Invert sort order';
 $lang['options_o_recursive'] = 'Recurse subfolders';
