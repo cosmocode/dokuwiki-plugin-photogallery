@@ -83,6 +83,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         $data['th']          = $this->getConf('thumbnail_height');
         $data['iw']          = $this->getConf('image_width');
         $data['ih']          = $this->getConf('image_height');
+        $data['vprot']       = $this->getConf('viewport_rotate');
         $data['panar']       = $this->getConf('panorama_ratio');
         $data['panw']        = $this->getConf('panorama_width');
         $data['panh']        = $this->getConf('panorama_height');
@@ -397,7 +398,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
             if(!$files[$i]['isimg']){
 								if(preg_match('/(.*?)\.(avi|mov|mp4)$/',$fname,$matches)){	// Is a video
 										$files[$i]['isvid'] = true;
-										$poster = getNS($files[$i]['id']).':'.$matches[1].'_poster_.jpg';
+										$poster = getNS($files[$i]['id']).':'.$matches[1].'_poster_.jpg'; // NOM: così i poster possono solo essere jpeg
 										if(in_array($poster,array_column($files,'id'))) // Check if poster exists
 												$files[$i]['poster'] = $poster;
 								}
@@ -680,87 +681,89 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				$ID = $img['id'];
 				$tw = $data['tw'];
 				$th = $data['th'];
-				//if ($data['phpthumb'] == true){
-				// if (true){
-				$iw = $data['iw'];
-				$ih = $data['ih'];
 				// NOM evitare l'uso della cache quando le dimensioni sono come le originali
-				// NOM Capire perchè non viene fatto il crop in entrambi i casi
+				// NOM spostare in alto $ispan
+				// NOM Rimuovere l'opzione per la cache
+				// NOM Sistemare le dimensioni dei poster dei video
+				// NOM Vedere se si può rimuovere la funzione _ratio
 				if($img['isvid']){
 						$vsrc = ml($ID);
 						//$vsrc = ml($ID,$tdim);
-						$opt = 'zc=C'; // Crop to given size
+						$topt = 'zc=C'; // Crop to given size
 						if($img['poster']){
 								$ID = $img['poster'];
-								$opt .= '!fltr=over|../images/video_frame.png';
-								$ipar['src'] = $tpar['src'];
+								$topt .= '!fltr=over|../images/video_frame.png';
+								$img['meta'] = new JpegMeta(mediaFN($ID));
+								$mw = (int) $this->_meta($img,'width');
+								$mh = (int) $this->_meta($img,'height');
+								dbg($mw);
+								$iw = $data['iw'];
+								$ih = $data['ih'];
+								//$ipar['src'] = $tpar['src'];
 						} else{
 								$tpar['src'] = 'video_thumb.png';
-								$ipar['src'] = 'video_poster.jpg';;
+								$ipar['src'] = 'video_poster.jpg';
+								// $iw = $data['iw'];
+								// $ih = $data['ih'];
 						}
 				} else{
 						$mw = (int) $this->_meta($img,'width');
 						$mh = (int) $this->_meta($img,'height');
+						// Test for panorama aspect ratio
 						$img_ar = ($mw > $mh ? $mw/$mh : $mh/$mw);
 						if (preg_match('/([0-9]+):([0-9]+)/',$data['panar'],$matches))
 								$max_ar = $matches[1]/$matches[2];
-						if ($img_ar > $max_ar){ // Test for panorama aspect ratio
-								$opt = 'far=1'; // Force aspect ratio
-								if ($mw > $mh){ // Landscape
-										$tw = floor($data['th'] * 0.6 * $img_ar);
-										$cropw = floor(($tw - $data['tw']) / 2);
-										$opt .= "!fltr=crop|$cropw|$cropw";
-										$opt .= '!fltr=over|../images/pano_landscape.png';
-								} else{ // Portrait or square
-										$th = floor($data['tw'] * 0.6 * $img_ar);
-										$croph = floor(($th - $data['th']) / 2);
-										$opt .= "!fltr=crop|0|0|$croph|$croph";
-										$opt .= '!fltr=over|../images/pano_portrate.png';
+						$ispan = ($img_ar > $max_ar);
+						if ($ispan){
+								$vpw = $data['panw'];
+								$vph = $data['panh'];
+						} else{
+								$vpw = $data['iw'];
+								$vph = $data['ih'];
+						}
+						if (($mh > $mw) and ($data['vprot'])) // Invert viewport for portrait images
+								list($vpw,$vph) = array($vph,$vpw);
+						if ($ispan){ // Panorama aspect ratio
+								if ($data['phpthumb'] == true){
+										$topt = 'far=1'; // Force aspect ratio
+										if ($mw > $mh){ // Landscape
+												$tw = floor($data['th'] * 0.6 * $img_ar);
+												$cropw = floor(($tw - $data['tw']) / 2);
+												$topt .= "!fltr=crop|$cropw|$cropw";
+												$topt .= '!fltr=over|../images/pano_landscape.png';
+										} else{ // Portrait or square
+												$th = floor($data['tw'] * 0.6 * $img_ar);
+												$croph = floor(($th - $data['th']) / 2);
+												$topt .= "!fltr=crop|0|0|$croph|$croph";
+												$topt .= '!fltr=over|../images/pano_portrate.png';
+										}
 								}
 								$iw = $data['panw'];
 								$ih = $data['panh'];
 						} else{  // Normal image
-								$opt = 'zc=C'; // Crop to given size
+								$topt = 'zc=C'; // Crop to given size
 						}
+						// Calculates new image sizes fitting into viewport
 						if ($img['fullsize']){  // Override image size for fullsize
-								$opt .= '!fltr=over|../images/image_fullsize.png';
+								$topt .= '!fltr=over|../images/image_fullsize.png';
 								$iw = $mw;
 								$ih = $mh;
-						} 
+						} else{
+								if ($data['crop']){
+										$ratio = $this->_fill_ratio($mw,$mh,$vpw,$vph);
+										$iw = floor($mw * $ratio);
+										$ih = floor($mh * $ratio);
+										if ($iw > $vpw)
+												$iw = $vpw;
+										if ($ih > $vph)
+												$ih = $vph;
+								} else{
+										$ratio = $this->_fit_ratio($mw,$mh,$vpw,$vph);
+										$iw = floor($mw * $ratio);
+										$ih = floor($mh * $ratio);
+								}
+						}
 				}
-				// } else{ // Use Dokuwiki media link and cache
-						// // // prepare dimensions
-						// // if ($img['fullsize']){
-								// // $cropw = (int) $this->_meta($img,'width');
-								// // $croph = (int) $this->_meta($img,'height');
-						// // } else{
-								// // $cropw = $data['iw'];
-								// // $croph = $data['ih'];
-						// // } 
-						// // $iw = (int) $this->_meta($img,'width');
-						// // $ih = (int) $this->_meta($img,'height');
-						// // // crop to lightbox dimensions
-						// // if($iw > $cropw || $ih > $croph){
-								// // $ratio = $this->_ratio($img,$cropw,$croph);
-								// // $iw = floor($iw * $ratio);
-								// // $ih = floor($ih * $ratio);
-						// // }
-						// // // $ipar['w'] = $iw;
-						// // // $ipar['h'] = $ih;
-						// // if($img['isvid']){
-								// // $vsrc = ml($ID,$tdim);
-								// // $tsrc = PHOTOGALLERY_IMAGES.'video_thumb.png';
-								// // if($img['poster']){
-										// // $ID = $img['poster'];
-										// // $ipar['src'] = $tpar['src'];
-								// // } else{
-										// // $tpar['src'] = 'video_thumb.png';
-										// // $ipar['src'] = 'video_poster.jpg';;
-								// // }
-						// // } else{
-								// // // $tpar['w'] = $tw;
-								// // // $tpar['h'] = $th;
-						// // }
 
 						// // //prepare image attributes
 						// // // $ia  = array();
@@ -780,7 +783,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 						$tpar['media'] = idfilter($ID);
 				$ipar['media'] = $tpar['media'];
 				if ($data['phpthumb'] == true)
-						$tpar['opt'] = $opt;
+						$tpar['opt'] = $topt;
 				$ipar['tok'] = media_get_token($ID,$iw,$ih);
 				$tpar['tok'] = media_get_token($ID,$tw,$th);
 				// $isrc = htmlspecialchars(pgThumbURL($ipar, PHOTOGALLERY_PGIMG_REL));
@@ -813,10 +816,10 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				}
 				else{
 						$ret .= '<img class="pg-preload" src="" data-src="'.$tsrc.'" '.$tatt.'/>'.DOKU_LF;
-				};
+				}
 				if ($idx < 5){
 						$ret .= '<img class="pg-preload" style="display:none;" src="'.$isrc.'" alt=""/>'.DOKU_LF;
-				};
+				}
 				$ret .= $video;
         $ret .= '</li>'.DOKU_LF;
         return $ret;
@@ -881,6 +884,45 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         return $ratio;
     }
 
+    /**
+     * Calculates the multiplier needed to resize the image to the given
+     * dimensions
+     *
+     */
+    function _fit_ratio($w, $h, $maxw, $maxh){
+				$ratio = 1;
+				if($w > $maxw){
+						$ratio = $maxw/$w;
+						if($h * $ratio > $maxh){
+								$ratio = $maxh/$h;
+						}
+				}
+				elseif($h > $maxh){
+						$ratio = $maxh/$h;
+						if($w * $ratio > $maxw){
+								$ratio = $maxw/$w;
+						}
+				}
+				return $ratio;
+    }
+
+    function _fill_ratio($w, $h, $maxw, $maxh){
+				$ratio = 1;
+				if($w > $maxw){
+						$ratio = $maxw/$w;
+						if($h * $ratio < $maxh){
+								$ratio = $maxh/$h;
+						}
+				}
+				elseif($h > $maxh){
+						$ratio = $maxh/$h;
+						if($w * $ratio < $maxw){
+								$ratio = $maxw/$w;
+						}
+				}
+				return $ratio;
+    }
+		
     /**
      * Return the caption for the image
      */

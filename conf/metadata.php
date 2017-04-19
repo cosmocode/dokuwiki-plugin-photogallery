@@ -14,6 +14,7 @@ $meta['thumbnail_width']  = array('numeric');
 $meta['thumbnail_height'] = array('numeric');
 $meta['image_width']      = array('numeric');
 $meta['image_height']     = array('numeric');
+$meta['viewport_rotate']  = array('onoff');
 $meta['panorama_width']   = array('numeric');
 $meta['panorama_height']  = array('numeric');
 $meta['posteralign']      = array('string');
