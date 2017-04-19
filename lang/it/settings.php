@@ -14,6 +14,7 @@ $lang['thumbnail_width']  = 'Larghezza immagine anteprima';
 $lang['thumbnail_height'] = 'Altezza immagine anteprima';
 $lang['image_width']      = 'Larghezza immagine';
 $lang['image_height']     = 'Altezza immagine';
+$lang['viewport_rotate']  = 'Ruota il quadro per immagini orizzontali';
 $lang['panorama_ratio']   = 'Considera l\'immagine panoramica se il suo rapporto di forma &egrave maggiore del parametro (A:B con A>B)';
 $lang['panorama_width']   = 'Larghezza immagine panoramica';
 $lang['panorama_height']  = 'Altezza immagine panoramica';

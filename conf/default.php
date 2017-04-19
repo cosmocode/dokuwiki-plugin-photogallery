@@ -14,6 +14,7 @@ $conf['thumbnail_width']  = 80;
 $conf['thumbnail_height'] = 60;
 $conf['image_width']      = 800;
 $conf['image_height']     = 600;
+$conf['viewport_rotate']  = 1;
 $conf['panorama_ratio']   = '16:9';
 $conf['panorama_width']   = 4000;
 $conf['panorama_height']  = 3000;

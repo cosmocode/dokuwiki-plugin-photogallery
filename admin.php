@@ -75,8 +75,8 @@ class admin_plugin_photogallery extends DokuWiki_Admin_Plugin {
 				$ok = (count($info) < count($arr));
 				$info = implode(', ',$info);
 				$this->_info_row('Important disabled functions',$info,$ok);
-				$info = fileperms(PHOTOGALLERY_PGIMG_FILE) & 0xFFF;
-				$ok = (($info & PHOTOGALLERY_PGIMG_EXE_PERM) == PHOTOGALLERY_PGIMG_EXE_PERM);
+				$info = fileperms(PHOTOGALLERY_PGFETCH_FILE) & 0xFFF;
+				$ok = (($info & PHOTOGALLERY_PGFETCH_EXE_PERM) == PHOTOGALLERY_PGFETCH_EXE_PERM);
 				$this->_info_row('pgImg.php execute permissions',sprintf('%o',$info),$ok);
 				ptln('</table>');
 				ptln('</div>');
