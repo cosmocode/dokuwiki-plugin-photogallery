@@ -275,10 +275,10 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 		}
 		
 		function _phpThumbCheck(){
-				$fperm = fileperms(PHOTOGALLERY_PGIMG_FILE);
-				if (($fperm & PHOTOGALLERY_PGIMG_EXE_PERM) != PHOTOGALLERY_PGIMG_EXE_PERM){
+				$fperm = fileperms(PHOTOGALLERY_PGFETCH_FILE);
+				if (($fperm & PHOTOGALLERY_PGFETCH_EXE_PERM) != PHOTOGALLERY_PGFETCH_EXE_PERM){
 						msg($this->getLang('phpthumbexecerror'),-1);
-						if (@chmod(PHOTOGALLERY_PGIMG_FILE, $fperm | PHOTOGALLERY_PGIMG_EXE_PERM)){
+						if (@chmod(PHOTOGALLERY_PGFETCH_FILE, $fperm | PHOTOGALLERY_PGFETCH_EXE_PERM)){
 								msg($this->getLang('phpthumbexecpermset'),1);
 								return true;
 						}
@@ -685,7 +685,6 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				// NOM spostare in alto $ispan
 				// NOM Rimuovere l'opzione per la cache
 				// NOM Sistemare le dimensioni dei poster dei video
-				// NOM Vedere se si può rimuovere la funzione _ratio
 				if($img['isvid']){
 						$vsrc = ml($ID);
 						//$vsrc = ml($ID,$tdim);
@@ -696,7 +695,6 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 								$img['meta'] = new JpegMeta(mediaFN($ID));
 								$mw = (int) $this->_meta($img,'width');
 								$mh = (int) $this->_meta($img,'height');
-								dbg($mw);
 								$iw = $data['iw'];
 								$ih = $data['ih'];
 								//$ipar['src'] = $tpar['src'];
@@ -786,10 +784,8 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 						$tpar['opt'] = $topt;
 				$ipar['tok'] = media_get_token($ID,$iw,$ih);
 				$tpar['tok'] = media_get_token($ID,$tw,$th);
-				// $isrc = htmlspecialchars(pgThumbURL($ipar, PHOTOGALLERY_PGIMG_REL));
-				$isrc = PHOTOGALLERY_PGIMG_REL.'?'. buildURLparams($ipar,'&amp;');
-				// $tsrc = htmlspecialchars(pgThumbURL($tpar, PHOTOGALLERY_PGIMG_REL));
-				$tsrc = PHOTOGALLERY_PGIMG_REL.'?'. buildURLparams($tpar,'&amp;');
+				$isrc = PHOTOGALLERY_PGFETCH_REL.'?'. buildURLparams($ipar,'&amp;');
+				$tsrc = PHOTOGALLERY_PGFETCH_REL.'?'. buildURLparams($tpar,'&amp;');
 				// prepare attributes
 				$ta = array();
 				$ta['alt'] = $this->_caption($img,$data);
@@ -853,35 +849,6 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
             // just return the array field
             return $img[$opt];
         }
-    }
-
-    /**
-     * Calculates the multiplier needed to resize the image to the given
-     * dimensions
-     *
-     * @author Andreas Gohr <andi@splitbrain.org>
-     */
-    function _ratio(&$img,$maxwidth,$maxheight=0){
-        if(!$maxheight) $maxheight = $maxwidth;
-
-        $w = $this->_meta($img,'width');
-        $h = $this->_meta($img,'height');
-
-        $ratio = 1;
-        if($w >= $h){
-            if($w >= $maxwidth){
-                $ratio = $maxwidth/$w;
-            }elseif($h > $maxheight){
-                $ratio = $maxheight/$h;
-            }
-        }else{
-            if($h >= $maxheight){
-                $ratio = $maxheight/$h;
-            }elseif($w > $maxwidth){
-                $ratio = $maxwidth/$w;
-            }
-        }
-        return $ratio;
     }
 
     /**
