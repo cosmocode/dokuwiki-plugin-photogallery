@@ -28,7 +28,6 @@ $lang['sort_o_title'] = 'EXIF Titel';
 $lang['sort_o_random'] = 'Zufällig';
 
 $lang['options'] = 'Zusätzliche Standardeinstellungen';
-$lang['options_o_cache'] = 'Zwischenspeicher';
 $lang['options_o_crop'] = 'Zuschneiden';
 $lang['options_o_reverse'] = 'Sortierung umdrehen';
 $lang['options_o_recursive'] = 'Unterordner durchsuchen';

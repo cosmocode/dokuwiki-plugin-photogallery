@@ -28,7 +28,6 @@ $lang['sort_o_title'] = 'Sort by EXIF title';
 $lang['sort_o_random'] = 'Sort randomly';
 
 $lang['options'] = 'Additional default options';
-$lang['options_o_cache'] = 'Cache';
 $lang['options_o_crop'] = 'Crop';
 $lang['options_o_reverse'] = 'Invert sort order';
 $lang['options_o_recursive'] = 'Recurse subfolders';

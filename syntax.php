@@ -257,7 +257,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         if($mode == 'xhtml'){
 
 						if($this->_auth_check($data)){
-								$R->info['cache'] &= $data['cache'];
+								$R->info['cache'] = false; // Disable global render cache
 								$this->_photo_gallery($data, $R); // Start gallery
 						}
 						elseif($cmd == 'show')
@@ -617,7 +617,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         $R->doc .= '<a href="'.$href.'" '.$aatt.'>'.DOKU_LF;
 				$R->doc .= '<img src="'.$src.'" '.$iatt.'/>'.DOKU_LF;
 				$R->doc .= '<div class="pg-zoom">';
-				$R->doc .= '<img src="'.PHOTOGALLERY_IMAGES.'zoom.png" alt=""/>';
+				$R->doc .= '<img src="'.PHOTOGALLERY_IMAGES_REL.'zoom.png" alt=""/>';
 				$R->doc .= '</div>'.DOKU_LF;
         $R->doc .= '</a>'.DOKU_LF;
 
@@ -683,7 +683,6 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				$th = $data['th'];
 				// NOM evitare l'uso della cache quando le dimensioni sono come le originali
 				// NOM spostare in alto $ispan
-				// NOM Rimuovere l'opzione per la cache
 				// NOM Sistemare le dimensioni dei poster dei video
 				if($img['isvid']){
 						$vsrc = ml($ID);

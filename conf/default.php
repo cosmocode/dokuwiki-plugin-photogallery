@@ -21,4 +21,4 @@ $conf['panorama_height']  = 3000;
 $conf['posteralign']      = 'left';
 
 $conf['sort'] = 'file';
-$conf['options'] = 'cache,showtitle,showinfo';
+$conf['options'] = 'showtitle,showinfo';

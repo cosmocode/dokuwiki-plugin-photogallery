@@ -14,5 +14,6 @@ if(!defined('PHOTOGALLERY_PGFETCH_REL')) define('PHOTOGALLERY_PGFETCH_REL',PHOTO
 if(!defined('PHOTOGALLERY_PGFETCH_FILE')) define('PHOTOGALLERY_PGFETCH_FILE',realpath(__DIR__.'/../'.PHOTOGALLERY_PGFETCH));
 if(!defined('PHOTOGALLERY_MEDIA_REL')) define('PHOTOGALLERY_MEDIA_REL',DOKU_REL.$GLOBALS['conf']['savedir'].'/media/');
 if(!defined('PHOTOGALLERY_MEDIA_FILE')) define('PHOTOGALLERY_MEDIA_FILE',realpath(__DIR__.'/../'.PHOTOGALLERY_MEDIA_REL));
-if(!defined('PHOTOGALLERY_IMAGES_FILE')) define('PHOTOGALLERY_IMAGES_FILE',DOKU_PLUGIN.'photogallery/images/');
+if(!defined('PHOTOGALLERY_IMAGES_REL')) define('PHOTOGALLERY_IMAGES_REL',PHOTOGALLERY_REL.'images/');
+if(!defined('PHOTOGALLERY_IMAGES_FILE')) define('PHOTOGALLERY_IMAGES_FILE',realpath(__DIR__.'/../images').'/');
 if(!defined('PHOTOGALLERY_PGFETCH_EXE_PERM')) define('PHOTOGALLERY_PGFETCH_EXE_PERM',0110); // Owner and group execute permission in octal notation

@@ -21,5 +21,5 @@ $meta['posteralign']      = array('string');
 $meta['panorama_ratio']   = array('string','_pattern' => '/([0-9]+):([0-9]+)/');
 
 $meta['sort']    = array('multichoice', '_choices' => array('file','mod','date','title','random'));
-$meta['options'] = array('multicheckbox', '_choices' => array('cache','crop','reverse','recursive','showtitle','showinfo','showfname'));
+$meta['options'] = array('multicheckbox', '_choices' => array('crop','reverse','recursive','showtitle','showinfo','showfname'));
 
