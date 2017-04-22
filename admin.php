@@ -6,9 +6,10 @@
  * @author  Marco Nolletti
  */
 
-require_once('inc/pgdefines.php');
 // must be run within Dokuwiki
 if(!defined('DOKU_INC')) die();
+
+require_once('inc/pgdefines.php');
 
 class admin_plugin_photogallery extends DokuWiki_Admin_Plugin {
 
@@ -44,6 +45,7 @@ class admin_plugin_photogallery extends DokuWiki_Admin_Plugin {
 				$this->_info_row('Plugin version',$info['date']);
 				$this->_info_row('Author',$info['author']);
 				$this->_info_row('Server parameters','Value','Status',true);
+				$this->_info_row('Plugin folder',__DIR__);
 				$ok = version_compare(PHP_VERSION,'5.4.45',">=");
 				$this->_info_row('Current PHP version',phpversion(),$ok);
 				$this->_info_row('Running webserver',htmlentities($_SERVER['SERVER_SOFTWARE']));

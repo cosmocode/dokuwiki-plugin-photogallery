@@ -5,14 +5,12 @@
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author  Marco Nolletti
  */
-if(!defined('DOKU_INC')) define('DOKU_INC', realpath(__DIR__.'/../../../').'/');
-require_once('inc/pgdefines.php');
-// must be run within Dokuwiki
-if(!defined('DOKU_INC')) die();
+define('DOKU_INC', realpath(__DIR__.'/../../../').'/');
 
 if (!defined('DOKU_DISABLE_GZIP_OUTPUT')) define('DOKU_DISABLE_GZIP_OUTPUT', 1);
 require_once(DOKU_INC.'inc/init.php');
 require_once(DOKU_INC.'inc/fetch.functions.php');
+require_once('inc/pgdefines.php');
 require_once('phpThumb/phpthumb.class.php');
 session_write_close(); //close session
 
@@ -24,12 +22,11 @@ if (defined('SIMPLE_TEST')) {
 $WIDTH  = $INPUT->int('w');
 $HEIGHT = $INPUT->int('h');
 $CACHE  = calc_cache($INPUT->str('cache'));
-$OPT = $INPUT->str('opt'); // phpThumb options
+$opt = $INPUT->str('opt'); // phpThumb options
 
 $mimetypes = getMimeTypes();
 
 if(!$INPUT->str('src')){
-
     //get input
     $MEDIA  = stripctl(getID('media', false)); // no cleaning except control chars - maybe external
     $REV    = & $INPUT->ref('rev');
@@ -86,8 +83,8 @@ if(!$INPUT->str('src')){
 
     //handle image resizing/cropping/phpThumbing
     if((substr($MIME, 0, 5) == 'image') && ($WIDTH || $HEIGHT)) {
-				if ($OPT){
-						$data['file'] = $FILE = media_photogallery_image($data['file'],$EXT,$WIDTH,$HEIGHT,$OPT);
+				if ($opt){
+						$data['file'] = $FILE = media_photogallery_image($data['file'],$EXT,$WIDTH,$HEIGHT,$opt);
 				} else {
 						if($HEIGHT && $WIDTH) {
 								$data['file'] = $FILE = media_crop_image($data['file'], $EXT, $WIDTH, $HEIGHT);
@@ -97,8 +94,6 @@ if(!$INPUT->str('src')){
 				}
     }
 		
-		// End NOM ======================
-
     // finally send the file to the client
     $evt = new Doku_Event('MEDIA_SENDFILE', $data);
     if($evt->advise_before()) {
@@ -114,8 +109,8 @@ if(!$INPUT->str('src')){
 		if($STATUS != 200) {
 				http_status($STATUS, $STATUSMESSAGE);
 		}
-		if ($OPT)
-				$FILE = media_photogallery_image($FILE,$EXT,$WIDTH,$HEIGHT,$OPT);
+		if ($opt)
+				$FILE = media_photogallery_image($FILE,$EXT,$WIDTH,$HEIGHT,$opt);
 		else
 				$FILE = media_crop_image($FILE, $EXT, $WIDTH, $HEIGHT);
 		sendFile($FILE, $MIME, $DL, $CACHE, false, $FILE);
@@ -162,72 +157,34 @@ function media_photogallery_image($file, $ext, $w, $h, $opt){
 	// create phpThumb object
 	$phpThumb = new phpThumb();
 
-	$capture_raw_data = false; // set to true to insert to database rather than render to screen or file (see below)
 	// this is very important when using a single object to process multiple images
 	$phpThumb->resetObject();
 
 	// set data source -- do this first, any settings must be made AFTER this call
-	$phpThumb->setSourceFilename($file);  // for static demo only
-	//$phpThumb->setSourceFilename($_FILES['userfile']['tmp_name']);
-	// or $phpThumb->setSourceData($binary_image_data);
-	// or $phpThumb->setSourceImageResource($gd_image_resource);
-
-	// PLEASE NOTE:
-	// You must set any relevant config settings here. The phpThumb
-	// object mode does NOT pull any settings from phpThumb.config.php
-	//$phpThumb->setParameter('config_document_root', '/home/groups/p/ph/phpthumb/htdocs/');
-	//$phpThumb->setParameter('config_cache_directory', '/tmp/persistent/phpthumb/cache/');
-
-	// set parameters (see "URL Parameters" in phpthumb.readme.txt)
-	$phpThumb->setParameter('w', $w);
-	$phpThumb->setParameter('h', $h);
-	//$phpThumb->setParameter('fltr', 'gam|1.2');
-	//$phpThumb->setParameter('fltr', 'wmi|../watermark.jpg|C|75|20|20');
-		//$fltr = array();
-//	echo $opt; die();
-		foreach (explode('!',$opt) as $par) {
-				preg_match('/^(.+)=(.+)$/', $par, $options);
-				//echo $options[1]. "->" . $options[2];
-				// if (preg_match('/^([a-z]+)\[(.+)\]$/', $options[1], $filters)){
-					// //$fltr[$filters[1]] = $filters[2];
-					// $phpThumb->setParameter($filters[1],$options[2]);
-					// //echo $filters[1].'='.$options[2];
-					// }
-				// else{
-						$phpThumb->setParameter($options[1], $options[2]);
-						//echo $options[1].'='. $options[2];
-				// }
-		}
-	//	if (count($fltr) > 0)
-		//		$phpThumb->setParameter('fltr[]', $fltr);
-	//die();
-
-	// set options (see phpThumb.config.php)
-	// here you must preface each option with "config_"
+	$phpThumb->setSourceFilename($file);
+	// $phpThumb->setParameter('config_document_root', '/home/groups/p/ph/phpthumb/htdocs/');
+	// $phpThumb->setParameter('config_allow_src_above_docroot', true); // needed if you're working outside DOCUMENT_ROOT, in a temp dir for example
 	$phpThumb->setParameter('config_output_format', 'jpg');
 	$phpThumb->setParameter('config_imagemagick_path', '/usr/local/bin/convert');
-	//$phpThumb->setParameter('config_allow_src_above_docroot', true); // needed if you're working outside DOCUMENT_ROOT, in a temp dir for example
 	$phpThumb->setParameter('config_temp_directory', DOKU_INC.'data/cache/');
 	$phpThumb->setParameter('config_prefer_imagemagick', true);
 	$phpThumb->setParameter('config_disable_debug',true);
 	$phpThumb->setParameter('config_cache_directory',null);
+	$phpThumb->setParameter('w', $w);
+	$phpThumb->setParameter('h', $h);
+	foreach (explode('!',$opt) as $par) {
+			preg_match('/^(.+)=(.+)$/', $par, $options);
+			$phpThumb->setParameter($options[1], $options[2]);
+	}
 
 	// generate & output thumbnail
-	//$local = getCacheName($file,'.media.'.$cw.'x'.$ch.'.crop.'.$ext);
 	$output_filename = getCacheName($file,'.media.'.$w.'x'.$h.'.photogallery.'.$phpThumb->config_output_format);
-	//$output_filename = './thumbnails/'.getCacheName($from,'.photogallery.'.$from_w.'x'.$from_h.$phpThumb->config_output_format);
-	//echo $output_filename; return;
 	
 	if ($phpThumb->GenerateThumbnail()) { // this line is VERY important, do not remove it!
-		$output_size_x = imagesx($phpThumb->gdimg_output);
-		$output_size_y = imagesy($phpThumb->gdimg_output);
-		if ($output_filename || $capture_raw_data) {
-			if ($capture_raw_data && $phpThumb->RenderOutput()) {
-				// RenderOutput renders the thumbnail data to $phpThumb->outputImageData, not to a file or the browser
-				//$mysqli->query("INSERT INTO `table` (`thumbnail`) VALUES ('".mysqli_real_escape_string($phpThumb->outputImageData)."') WHERE (`id` = '".mysqli_real_escape_string($id)."')");
-			} elseif ($phpThumb->RenderToFile($output_filename)) {
+		if ($output_filename) {
+			if ($phpThumb->RenderToFile($output_filename)) {
 				// do something on success
-				return $output_filename;//NOM
+				return $output_filename;
 				//echo 'Successfully rendered:<br><img src="'.$output_filename.'">';
 			} else {
 				// do something with debug/error messages
@@ -238,11 +195,9 @@ function media_photogallery_image($file, $ext, $w, $h, $opt){
 			$phpThumb->OutputThumbnail();
 		}
 	} else {
-		// do something with debug/error messages
+		// do something with error messages
 		echo 'Failed (size='.$thumbnail_width.').<br>';
 		echo '<div style="background-color:#FFEEDD; font-weight: bold; padding: 10px;">'.$phpThumb->fatalerror.'</div>';
 		echo '<form><textarea rows="10" cols="60" wrap="off">'.htmlentities(implode("\n* ", $phpThumb->debugmessages)).'</textarea></form><hr>';
-
 	}
-
 }
