@@ -49,6 +49,7 @@ class admin_plugin_photogallery extends DokuWiki_Admin_Plugin {
 				$ok = version_compare(PHP_VERSION,'5.4.45',">=");
 				$this->_info_row('Current PHP version',phpversion(),$ok);
 				$this->_info_row('Running webserver',htmlentities($_SERVER['SERVER_SOFTWARE']));
+				$this->_info_row('PHP memory limit',ini_get('memory_limit'));
 				$ok = extension_loaded('exif');
 				$this->_info_row('EXIF extension',($ok ? '' : 'not').' loaded',$ok);
 				$ok = extension_loaded('curl');
