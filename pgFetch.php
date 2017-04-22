@@ -5,14 +5,12 @@
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author  Marco Nolletti
  */
-if(!defined('DOKU_INC')) define('DOKU_INC', realpath(__DIR__.'/../../../').'/');
-require_once('inc/pgdefines.php');
-// must be run within Dokuwiki
-if(!defined('DOKU_INC')) die();
+define('DOKU_INC', realpath(__DIR__.'/../../../').'/');
 
 if (!defined('DOKU_DISABLE_GZIP_OUTPUT')) define('DOKU_DISABLE_GZIP_OUTPUT', 1);
 require_once(DOKU_INC.'inc/init.php');
 require_once(DOKU_INC.'inc/fetch.functions.php');
+require_once('inc/pgdefines.php');
 require_once('phpThumb/phpthumb.class.php');
 session_write_close(); //close session
 
@@ -29,7 +27,6 @@ $OPT = $INPUT->str('opt'); // phpThumb options
 $mimetypes = getMimeTypes();
 
 if(!$INPUT->str('src')){
-
     //get input
     $MEDIA  = stripctl(getID('media', false)); // no cleaning except control chars - maybe external
     $REV    = & $INPUT->ref('rev');
@@ -206,7 +203,7 @@ function media_photogallery_image($file, $ext, $w, $h, $opt){
 	// here you must preface each option with "config_"
 	$phpThumb->setParameter('config_output_format', 'jpg');
 	$phpThumb->setParameter('config_imagemagick_path', '/usr/local/bin/convert');
-	//$phpThumb->setParameter('config_allow_src_above_docroot', true); // needed if you're working outside DOCUMENT_ROOT, in a temp dir for example
+	$phpThumb->setParameter('config_allow_src_above_docroot', true); // needed if you're working outside DOCUMENT_ROOT, in a temp dir for example
 	$phpThumb->setParameter('config_temp_directory', DOKU_INC.'data/cache/');
 	$phpThumb->setParameter('config_prefer_imagemagick', true);
 	$phpThumb->setParameter('config_disable_debug',true);
@@ -219,8 +216,8 @@ function media_photogallery_image($file, $ext, $w, $h, $opt){
 	//echo $output_filename; return;
 	
 	if ($phpThumb->GenerateThumbnail()) { // this line is VERY important, do not remove it!
-		$output_size_x = imagesx($phpThumb->gdimg_output);
-		$output_size_y = imagesy($phpThumb->gdimg_output);
+		// $output_size_x = imagesx($phpThumb->gdimg_output);
+		// $output_size_y = imagesy($phpThumb->gdimg_output);
 		if ($output_filename || $capture_raw_data) {
 			if ($capture_raw_data && $phpThumb->RenderOutput()) {
 				// RenderOutput renders the thumbnail data to $phpThumb->outputImageData, not to a file or the browser

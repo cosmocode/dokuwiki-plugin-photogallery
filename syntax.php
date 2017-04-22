@@ -7,10 +7,10 @@
  * @author  Marco Nolletti
  */
 
-require_once('inc/pgdefines.php');
-// must be run within Dokuwiki
+ // must be run within Dokuwiki
 if(!defined('DOKU_INC')) die();
 
+require_once('inc/pgdefines.php');
 require_once(DOKU_PLUGIN.'syntax.php');
 require_once(DOKU_INC.'inc/search.php');
 require_once(DOKU_INC.'inc/JpegMeta.php');
