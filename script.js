@@ -41,22 +41,22 @@ jQuery(document).on('click', 'a.pg-start', function() {
 	return false;
 });
 
-/**
- * Attach click event to the poster <a> tag
-	 Runs when complete page is fully loaded, including all frames, objects and images
- */
-jQuery(window).load(function(){
-	// Trigger thumbnails preload
-	jQuery('img.pg-preload').each(function(index) {
-		jQuery(this).attr('src', jQuery(this).data('src'));
-	});
-	//alert("ok window");
-	// Trigger images preload
-	// jQuery('ul.pg-show').each(function(index) {
-			// var $li = jQuery(this).children('li').first().data('src');
-			// //jQuery('<img src="'.$li.'"/>');
-// //					jQuery(this).attr('src', jQuery(this).data('src'));
+// /**
+ // * Attach click event to the poster <a> tag
+	 // Runs when complete page is fully loaded, including all frames, objects and images
+ // */
+// jQuery(window).load(function(){
+	// // Trigger thumbnails preload
+	// jQuery('img.pg-preload').each(function(index) {
+		// jQuery(this).attr('src', jQuery(this).data('src'));
 	// });
-});
+	// //alert("ok window");
+	// // Trigger images preload
+	// // jQuery('ul.pg-show').each(function(index) {
+			// // var $li = jQuery(this).children('li').first().data('src');
+			// // //jQuery('<img src="'.$li.'"/>');
+// // //					jQuery(this).attr('src', jQuery(this).data('src'));
+	// // });
+// });
 
 //		jQuery("img.lazy").lazyload();

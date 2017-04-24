@@ -81,14 +81,15 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         $data['ph']          = $this->getConf('poster_height');
         $data['tw']          = $this->getConf('thumbnail_width');
         $data['th']          = $this->getConf('thumbnail_height');
-        $data['iw']          = $this->getConf('image_width');
-        $data['ih']          = $this->getConf('image_height');
+        $data['iw']          = $this->getConf('viewport_width');
+        $data['ih']          = $this->getConf('viewport_height');
         $data['vprot']       = $this->getConf('viewport_rotate');
         $data['panar']       = $this->getConf('panorama_ratio');
         $data['panw']        = $this->getConf('panorama_width');
         $data['panh']        = $this->getConf('panorama_height');
         $data['posteralign'] = $this->getConf('posteralign');
         $data['filter']      = '';
+        $data['fullsize']    = $this->getConf('fullsize');
         $data['sort']        = $this->getConf('sort');
         $data['limit']       = 0;
         $data['offset']      = 0;
@@ -681,8 +682,6 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				$ID = $img['id'];
 				$tw = $data['tw'];
 				$th = $data['th'];
-				// NOM evitare l'uso della cache quando le dimensioni sono come le originali
-				// NOM spostare in alto $ispan
 				// NOM Sistemare le dimensioni dei poster dei video
 				if($img['isvid']){
 						$vsrc = ml($ID);
@@ -735,14 +734,11 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 												$topt .= '!fltr=over|../images/pano_portrate.png';
 										}
 								}
-								$iw = $data['panw'];
-								$ih = $data['panh'];
 						} else{  // Normal image
 								$topt = 'zc=C'; // Crop to given size
 						}
 						// Calculates new image sizes fitting into viewport
 						if ($img['fullsize']){  // Override image size for fullsize
-								$topt .= '!fltr=over|../images/image_fullsize.png';
 								$iw = $mw;
 								$ih = $mh;
 						} else{
@@ -754,22 +750,28 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 												$iw = $vpw;
 										if ($ih > $vph)
 												$ih = $vph;
+										$iopt = 'zc=C'; // Crop to given size
 								} else{
 										$ratio = $this->_fit_ratio($mw,$mh,$vpw,$vph);
 										$iw = floor($mw * $ratio);
 										$ih = floor($mh * $ratio);
+										$iopt = 'iar=1'; // Simple resize
 								}
+						}
+						// Shows HR overlay
+						if ($iw * $ih > 12000000){
+								$topt .= '!fltr=over|../images/image_hr.png';
 						}
 				}
 
-						// // //prepare image attributes
-						// // // $ia  = array();
-						// // // $ia['width'] = $iw;
-						// // // $ia['height'] = $ih;
-						// // // $ia['border'] = 0;
-						// // // $ia['title'] = $this->_caption($img,$data);
-						// // // $iatt = buildAttributes($ia); //NOM not used yet
-				// }
+				//prepare image attributes
+				// $ia  = array();
+				// $ia['width'] = $iw;
+				// $ia['height'] = $ih;
+				// $ia['border'] = 0;
+				// $ia['title'] = $this->_caption($img,$data);
+				// $iatt = buildAttributes($ia); //NOM not used yet
+
 				$tpar['w'] = $tw;
 				$tpar['h'] = $th;
 				$ipar['w'] = $iw;
@@ -779,8 +781,10 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				else
 						$tpar['media'] = idfilter($ID);
 				$ipar['media'] = $tpar['media'];
-				if ($data['phpthumb'] == true)
+				if ($data['phpthumb'] == true){
 						$tpar['opt'] = $topt;
+						$ipar['opt'] = $iopt;
+				}
 				$ipar['tok'] = media_get_token($ID,$iw,$ih);
 				$tpar['tok'] = media_get_token($ID,$tw,$th);
 				$isrc = PHOTOGALLERY_PGFETCH_REL.'?'. buildURLparams($ipar,'&amp;');
@@ -791,8 +795,6 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				$tatt = buildAttributes($ta);
 				// HTML rendering
   			$ret ='';
-				$style =' style="display:none;"';
-				$style = ''; //NOM: controllare
 				$video = '';
 				if($img['isvid']){
 						$video .= '<div id="video'.$idx.'" style="display:none;">'.DOKU_LF;
@@ -803,18 +805,9 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 						$video .= '</div>'.DOKU_LF;
 						$ret .= '<li data-poster="'.$isrc.'" data-html="#video'.$idx.'">'.DOKU_LF;
 				} else{
-						$ret .= '<li data-src="'.$isrc.'"'.$style.'>'.DOKU_LF;
+						$ret .= '<li data-src="'.$isrc.'">'.DOKU_LF;
 				}
-				if ($idx < 25){
-						$ret .= '<img class="pg-preload" src="'.$tsrc.'" '.$tatt.'/>'.DOKU_LF;
-//				$ret .= '<img src="'.$tsrc.'" '.$tatt.'/>'.DOKU_LF;
-				}
-				else{
-						$ret .= '<img class="pg-preload" src="" data-src="'.$tsrc.'" '.$tatt.'/>'.DOKU_LF;
-				}
-				if ($idx < 5){
-						$ret .= '<img class="pg-preload" style="display:none;" src="'.$isrc.'" alt=""/>'.DOKU_LF;
-				}
+				$ret .= '<img src="'.$tsrc.'" '.$tatt.'/>'.DOKU_LF;
 				$ret .= $video;
         $ret .= '</li>'.DOKU_LF;
         return $ret;
