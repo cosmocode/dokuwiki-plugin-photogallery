@@ -81,14 +81,15 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         $data['ph']          = $this->getConf('poster_height');
         $data['tw']          = $this->getConf('thumbnail_width');
         $data['th']          = $this->getConf('thumbnail_height');
-        $data['iw']          = $this->getConf('image_width');
-        $data['ih']          = $this->getConf('image_height');
+        $data['iw']          = $this->getConf('viewport_width');
+        $data['ih']          = $this->getConf('viewport_height');
         $data['vprot']       = $this->getConf('viewport_rotate');
         $data['panar']       = $this->getConf('panorama_ratio');
         $data['panw']        = $this->getConf('panorama_width');
         $data['panh']        = $this->getConf('panorama_height');
         $data['posteralign'] = $this->getConf('posteralign');
         $data['filter']      = '';
+        $data['fullsize']    = $this->getConf('fullsize');
         $data['sort']        = $this->getConf('sort');
         $data['limit']       = 0;
         $data['offset']      = 0;
@@ -682,6 +683,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				$tw = $data['tw'];
 				$th = $data['th'];
 				// NOM evitare l'uso della cache quando le dimensioni sono come le originali
+				// NOM non ridimensionare immagini più piccole
 				// NOM spostare in alto $ispan
 				// NOM Sistemare le dimensioni dei poster dei video
 				if($img['isvid']){
@@ -742,7 +744,6 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 						}
 						// Calculates new image sizes fitting into viewport
 						if ($img['fullsize']){  // Override image size for fullsize
-								$topt .= '!fltr=over|../images/image_fullsize.png';
 								$iw = $mw;
 								$ih = $mh;
 						} else{
@@ -759,6 +760,10 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 										$iw = floor($mw * $ratio);
 										$ih = floor($mh * $ratio);
 								}
+						}
+						// Shows HR overlay
+						if ($iw * $ih > 12000000){
+								$topt .= '!fltr=over|../images/image_hr.png';
 						}
 				}
 
