@@ -18,7 +18,7 @@ function InitPgGallery(tw,th,play){
 				autoplay:play,
 				showAfterLoad:true,
 				pause:4000,
-				preload:2,
+				preload:1,
 				mode:"lg-fade",
 				thumbWidth:tw,
 				thumbContHeight:th

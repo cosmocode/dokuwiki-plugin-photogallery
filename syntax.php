@@ -682,9 +682,6 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				$ID = $img['id'];
 				$tw = $data['tw'];
 				$th = $data['th'];
-				// NOM evitare l'uso della cache quando le dimensioni sono come le originali
-				// NOM non ridimensionare immagini più piccole
-				// NOM spostare in alto $ispan
 				// NOM Sistemare le dimensioni dei poster dei video
 				if($img['isvid']){
 						$vsrc = ml($ID);
@@ -737,8 +734,6 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 												$topt .= '!fltr=over|../images/pano_portrate.png';
 										}
 								}
-								$iw = $data['panw'];
-								$ih = $data['panh'];
 						} else{  // Normal image
 								$topt = 'zc=C'; // Crop to given size
 						}
@@ -755,10 +750,12 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 												$iw = $vpw;
 										if ($ih > $vph)
 												$ih = $vph;
+										$iopt = 'zc=C'; // Crop to given size
 								} else{
 										$ratio = $this->_fit_ratio($mw,$mh,$vpw,$vph);
 										$iw = floor($mw * $ratio);
 										$ih = floor($mh * $ratio);
+										$iopt = 'iar=1'; // Simple resize
 								}
 						}
 						// Shows HR overlay
@@ -767,14 +764,14 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 						}
 				}
 
-						// // //prepare image attributes
-						// // // $ia  = array();
-						// // // $ia['width'] = $iw;
-						// // // $ia['height'] = $ih;
-						// // // $ia['border'] = 0;
-						// // // $ia['title'] = $this->_caption($img,$data);
-						// // // $iatt = buildAttributes($ia); //NOM not used yet
-				// }
+				//prepare image attributes
+				// $ia  = array();
+				// $ia['width'] = $iw;
+				// $ia['height'] = $ih;
+				// $ia['border'] = 0;
+				// $ia['title'] = $this->_caption($img,$data);
+				// $iatt = buildAttributes($ia); //NOM not used yet
+
 				$tpar['w'] = $tw;
 				$tpar['h'] = $th;
 				$ipar['w'] = $iw;
@@ -784,8 +781,10 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				else
 						$tpar['media'] = idfilter($ID);
 				$ipar['media'] = $tpar['media'];
-				if ($data['phpthumb'] == true)
+				if ($data['phpthumb'] == true){
 						$tpar['opt'] = $topt;
+						$ipar['opt'] = $iopt;
+				}
 				$ipar['tok'] = media_get_token($ID,$iw,$ih);
 				$tpar['tok'] = media_get_token($ID,$tw,$th);
 				$isrc = PHOTOGALLERY_PGFETCH_REL.'?'. buildURLparams($ipar,'&amp;');

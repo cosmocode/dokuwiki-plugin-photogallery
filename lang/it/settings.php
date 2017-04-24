@@ -17,8 +17,8 @@ $lang['viewport_width']   = 'Larghezza del quadro che contiene l\'immagine';
 $lang['viewport_height']  = 'Altezza del quadro che contiene l\'immagine';
 $lang['viewport_rotate']  = 'Ruota il quadro per immagini orizzontali';
 $lang['panorama_ratio']   = 'Considera l\'immagine panoramica se il suo rapporto di forma &egrave maggiore del parametro (A:B con A>B)';
-$lang['panorama_width']   = 'Larghezza immagine panoramica';
-$lang['panorama_height']  = 'Altezza immagine panoramica';
+$lang['panorama_width']   = 'Larghezza del quadro per immagini panoramiche';
+$lang['panorama_height']  = 'Altezza del quadro per immagini panoramiche';
 
 $lang['sort']         = 'Ordinamemento delle immagini';
 $lang['sort_o_file']  = 'Ordina per nome del file';

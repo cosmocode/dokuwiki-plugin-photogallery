@@ -17,8 +17,8 @@ $lang['viewport_width']   = 'Viewport width';
 $lang['viewport_height']  = 'Viewport height';
 $lang['viewport_rotate']  = 'Rotate viewport for portrate images';
 $lang['panorama_ratio']   = 'Consider the image as panorama if the aspect ratio is greater than the parameter (A:B con A>B)';
-$lang['panorama_width']   = 'Panoramic image width';
-$lang['panorama_height']  = 'Panoramic image height';
+$lang['panorama_width']   = 'Panoramic image vireport width';
+$lang['panorama_height']  = 'Panoramic image vireport height';
 
 $lang['sort']         = 'How to sort the gallery images';
 $lang['sort_o_file']  = 'Sort by filename';

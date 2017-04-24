@@ -17,8 +17,8 @@ $lang['viewport_width']   = 'Ansichtsfensterbreite';
 $lang['viewport_height']  = 'Ansichtsfensterhöhe';
 $lang['viewport_rotate']  = 'Ansichtsfenster für horizontale Bilder drehen';
 $lang['panorama_ratio']   = 'Bild as Panorama betrachet wenn das Bildseitenverhältnis größer als der Parameter ist (A:B mit A>B)';
-$lang['panorama_width']   = 'Bildbreite für Panorama';
-$lang['panorama_height']  = 'Bildhöhe für Panorama';
+$lang['panorama_width']   = 'Ansichtsfensterbreite für Panorama';
+$lang['panorama_height']  = 'Ansichtsfensterhöhe für Panorama';
 
 $lang['sort']         = 'Sortierung der Galeriebilder';
 $lang['sort_o_file']  = 'Dateiname';

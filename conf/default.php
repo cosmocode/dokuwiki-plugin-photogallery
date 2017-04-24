@@ -17,8 +17,8 @@ $conf['viewport_width']   = 800;
 $conf['viewport_height']  = 600;
 $conf['viewport_rotate']  = 1;
 $conf['panorama_ratio']   = '16:9';
-$conf['panorama_width']   = 4000;
-$conf['panorama_height']  = 3000;
+$conf['panorama_width']   = 3840;
+$conf['panorama_height']  = 2160;
 
 $conf['sort'] = 'file';
 $conf['options'] = 'showtitle,showinfo';
