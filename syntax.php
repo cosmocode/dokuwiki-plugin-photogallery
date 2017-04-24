@@ -791,8 +791,6 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				$tatt = buildAttributes($ta);
 				// HTML rendering
   			$ret ='';
-				$style =' style="display:none;"';
-				$style = ''; //NOM: controllare
 				$video = '';
 				if($img['isvid']){
 						$video .= '<div id="video'.$idx.'" style="display:none;">'.DOKU_LF;
@@ -803,18 +801,9 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 						$video .= '</div>'.DOKU_LF;
 						$ret .= '<li data-poster="'.$isrc.'" data-html="#video'.$idx.'">'.DOKU_LF;
 				} else{
-						$ret .= '<li data-src="'.$isrc.'"'.$style.'>'.DOKU_LF;
+						$ret .= '<li data-src="'.$isrc.'">'.DOKU_LF;
 				}
-				if ($idx < 25){
-						$ret .= '<img class="pg-preload" src="'.$tsrc.'" '.$tatt.'/>'.DOKU_LF;
-//				$ret .= '<img src="'.$tsrc.'" '.$tatt.'/>'.DOKU_LF;
-				}
-				else{
-						$ret .= '<img class="pg-preload" src="" data-src="'.$tsrc.'" '.$tatt.'/>'.DOKU_LF;
-				}
-				if ($idx < 5){
-						$ret .= '<img class="pg-preload" style="display:none;" src="'.$isrc.'" alt=""/>'.DOKU_LF;
-				}
+				$ret .= '<img src="'.$tsrc.'" '.$tatt.'/>'.DOKU_LF;
 				$ret .= $video;
         $ret .= '</li>'.DOKU_LF;
         return $ret;
