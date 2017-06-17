@@ -21,5 +21,5 @@ $meta['panorama_width']   = array('numeric');
 $meta['panorama_height']  = array('numeric');
 
 $meta['sort']    = array('multichoice', '_choices' => array('file','mod','date','title','random'));
-$meta['options'] = array('multicheckbox', '_choices' => array('fullsize','crop','reverse','recursive','showtitle','showinfo','showfname'));
+$meta['options'] = array('multicheckbox', '_choices' => array('fullsize','crop','reverse','recursive','showtitle','showinfo','showdescription','showkeywords','showfname'));
 

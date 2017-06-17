@@ -2,8 +2,9 @@
 /**
  * German language file for photogallery plugin
  *
- * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
- * @author  Marco Nolletti / Felix Mühlbauer
+ * @license       GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * @author        Marco Nolletti
+ * @contributors  Felix Mühlbauer
  */
  
 $lang['use_phpThumb']     = 'phpThumb für Cache und Thumbnails generation Verwenden';
@@ -33,6 +34,8 @@ $lang['options_o_crop'] = 'Zuschneiden';
 $lang['options_o_reverse'] = 'Sortierung umdrehen';
 $lang['options_o_recursive'] = 'Unterordner durchsuchen';
 $lang['options_o_showtitle'] = 'Titel des Bildes anzeigen';
+$lang['options_o_showdescription'] = 'Breschreibung des Bildes anzeigen';
+$lang['options_o_showkeywords'] = 'Schlagwörter des Bildes anzeigen';
 $lang['options_o_showinfo'] = 'EXIF Info anzeigen';
 $lang['options_o_showfname'] = 'Dateiname anzeigen';
 

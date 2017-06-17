@@ -3,8 +3,9 @@
  * DokuWiki Plugin photogallery (Syntax Component)
  * Embed an image gallery
  *
- * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
- * @author  Marco Nolletti
+ * @license      GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * @author       Marco Nolletti
+ * @contributors Michael Große
  */
 
  // must be run within Dokuwiki
@@ -17,6 +18,8 @@ require_once(DOKU_INC.'inc/JpegMeta.php');
 require_once('lib/array_column.php');
 
 class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {	
+
+    protected $metaAliases = null;
 
     /**
      * What kind of syntax are we?
@@ -253,7 +256,9 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
     function render($mode, Doku_Renderer $R, $data){
         global $ID;
 				global $conf;
-				
+
+        $this->metaAliases = $this->getMetaTagAliases();
+
 				$cmd = $data['command'];
         if($mode == 'xhtml'){
 
@@ -298,6 +303,8 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         global $conf;
         global $lang;
 				global $ID;
+				global $auth;
+				global $USERINFO;
 				
 				//dbg($data);
         $cmd = $data['command'];
@@ -324,7 +331,9 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 						if (class_exists('ZipArchive')){
 								$zip = $data['ns'].":".$data['zipfile'];
 								$this->_createzipfile($files, mediaFN($zip));
-								$data['ziplink'] = $R->internalmedia($zip,$this->getLang('lnk_download'),null,null,null,null,'linkonly',true);
+								if($this->_zip_auth_check($data)){								
+										$data['ziplink'] = $R->internalmedia($zip,$this->getLang('lnk_download'),null,null,null,null,'linkonly',true);
+								}
 						}
 						else
 							msg($this->getLang('zipdisabled'),2);
@@ -819,21 +828,23 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
      * Automatically checks if a JPEGMeta object is available or if all data is
      * supplied in array
      */
-    function _meta(&$img,$opt){
+    function _meta($img,$opt){
         if($img['meta']){
             // map JPEGMeta calls to opt names
 
             switch($opt){
                 case 'title':
-                    return $img['meta']->getField('Simple.Title');
+                    return $img['meta']->getField($this->metaAliases['img_title']);
                 case 'desc':
-                    return $img['meta']->getField('Iptc.Caption');
+                    return $img['meta']->getField($this->metaAliases['img_caption']);
+                case 'keywords':
+                    return $img['meta']->getField($this->metaAliases['img_keywords']);
                 case 'cdate':
-                    return $img['meta']->getField('Date.EarliestTime');
+                    return $img['meta']->getField($this->metaAliases['img_date']);
                 case 'width':
-                    return $img['meta']->getField('File.Width');
+                    return $img['meta']->getField($this->metaAliases['img_width']);
                 case 'height':
-                    return $img['meta']->getField('File.Height');
+                    return $img['meta']->getField($this->metaAliases['img_height']);
                 default:
                     return '';
             }
@@ -841,6 +852,36 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
             // just return the array field
             return $img[$opt];
         }
+    }
+
+    /**
+     * Use the existing DokuWiki-configuration to find all aliases for a given image meta-information
+     *
+     * This is based on @see tpl_get_img_meta()
+     *
+     * @return array
+     */
+    protected function getMetaTagAliases() {
+        $config_files = getConfigFiles('mediameta');
+        foreach ($config_files as $config_file) {
+            if(file_exists($config_file)) {
+                include($config_file);
+            }
+        }
+        /** @var array $fields the included array with metadata */
+
+        $tagAliases = array();
+        foreach($fields as $tag){
+            $t = array();
+            if (!empty($tag[0])) {
+                $t = array($tag[0]);
+            }
+            if(is_array($tag[3])) {
+                $t = array_merge($t,$tag[3]);
+            }
+            $tagAliases[$tag[1]] = $t;
+        }
+        return $tagAliases;
     }
 
     /**
@@ -891,6 +932,18 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 						$title = $this->_meta($img,'title');
 						if(isset($title)){
 							$ret .= '<h4>'.hsc($title).'</h4>';
+						}
+				}
+				if ($data['showdescription']) {
+                    $desc = $this->_meta($img,'desc');
+                    if(!empty($desc)){
+                        $ret .= '<p>'.nl2br(hsc($desc)).'</p>';
+                    }
+                }
+				if ($data['showkeywords']) {
+						$keywords = $this->_meta($img,'keywords');
+						if(!empty($keywords)){
+								$ret .= '<p>'.hsc($keywords).'</p>';
 						}
 				}
 				if ($data['showinfo']){
@@ -961,7 +1014,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 		}
 
     /**
-     * Check ACLs
+     * Check ACLs on Gallery
      */
 		function _auth_check($data){
 				global $USERINFO;
@@ -974,6 +1027,28 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				if(is_null($user)) return false;
 				$groups = (array) $USERINFO['grps'];
 				$authlist = $data['authlist'];
+				if (isset($authlist)){
+					$authlist .= ','.$conf['superuser'];
+					return auth_isMember($authlist, $user, $groups);
+				}
+				else
+					return true;
+		}
+
+    /**
+     * Check ACLs on Zip link
+     */
+		function _zip_auth_check($data){
+				global $USERINFO;
+				global $auth;
+				global $conf;
+
+				if(!$auth) return false;
+				$user .= $_SERVER['REMOTE_USER'];
+
+				if(is_null($user)) return false;
+				$groups = (array) $USERINFO['grps'];
+				$authlist = $data['zipauthlist'];
 				if (isset($authlist)){
 					$authlist .= ','.$conf['superuser'];
 					return auth_isMember($authlist, $user, $groups);

@@ -33,6 +33,8 @@ $lang['options_o_crop'] = 'Ritaglia';
 $lang['options_o_reverse'] = 'Inverti';
 $lang['options_o_recursive'] = 'Ricerca ricorsiva';
 $lang['options_o_showtitle'] = 'Mostra titolo';
+$lang['options_o_showdescription'] = 'Mostra la descrizione';
+$lang['options_o_showkeywords'] = 'Mostra le parole chiave';
 $lang['options_o_showinfo'] = 'Mostra info EXIF';
 $lang['options_o_showfname'] = 'Mostra nome file';
 
