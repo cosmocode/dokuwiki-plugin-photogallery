@@ -2,9 +2,10 @@
 /**
  * German language file for photogallery plugin
  *
- * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
- * @author  Marco Nolletti / Felix Mühlbauer
- */
+ * @license      GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * @author       Marco Nolletti
+ * @contributors Felix Mühlbauer, Michael Große
+*/
  
 $lang['imagescnt'] = '%s Bilder';
 $lang['videoocnt'] = '%s Videos';

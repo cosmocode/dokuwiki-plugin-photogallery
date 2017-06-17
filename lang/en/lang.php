@@ -4,6 +4,7 @@
  *
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author  Marco Nolletti
+ * @contributors Felix Mühlbauer
  */
 
 $lang['imagescnt'] = '%s images';

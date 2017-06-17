@@ -3,8 +3,9 @@
  * DokuWiki Plugin photogallery (Syntax Component)
  * Embed an image gallery
  *
- * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
- * @author  Marco Nolletti
+ * @license      GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * @author       Marco Nolletti
+ * @contributors Michael Große
  */
 
  // must be run within Dokuwiki
@@ -929,18 +930,18 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 							$ret .= '<h4>'.hsc($title).'</h4>';
 						}
 				}
-				if ($data['showdesc']) {
+				if ($data['showdescription']) {
                     $desc = $this->_meta($img,'desc');
                     if(!empty($desc)){
                         $ret .= '<p>'.nl2br(hsc($desc)).'</p>';
                     }
                 }
-                if ($data['showkeywords']) {
-                    $keywords = $this->_meta($img,'keywords');
-                    if(!empty($keywords)){
-                        $ret .= '<p>'.hsc($keywords).'</p>';
-                    }
-                }
+				if ($data['showkeywords']) {
+						$keywords = $this->_meta($img,'keywords');
+						if(!empty($keywords)){
+								$ret .= '<p>'.hsc($keywords).'</p>';
+						}
+				}
 				if ($data['showinfo']){
 						$ret .= $this->_exif($img);
 				}

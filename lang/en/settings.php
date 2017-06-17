@@ -33,6 +33,8 @@ $lang['options_o_crop'] = 'Crop';
 $lang['options_o_reverse'] = 'Invert sort order';
 $lang['options_o_recursive'] = 'Recurse subfolders';
 $lang['options_o_showtitle'] = 'Show the title of the image';
+$lang['options_o_showdescription'] = 'Show the description of the image';
+$lang['options_o_showkeywords'] = 'Show the keywords of the image';
 $lang['options_o_showinfo'] = 'Show EXIF info';
 $lang['options_o_showfname'] = 'Show the filename';
 
