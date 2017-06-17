@@ -18,6 +18,8 @@ require_once('lib/array_column.php');
 
 class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {	
 
+    protected $metaAliases = null;
+
     /**
      * What kind of syntax are we?
      */
@@ -253,7 +255,9 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
     function render($mode, Doku_Renderer $R, $data){
         global $ID;
 				global $conf;
-				
+
+        $this->metaAliases = $this->getMetaTagAliases();
+
 				$cmd = $data['command'];
         if($mode == 'xhtml'){
 
@@ -819,21 +823,23 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
      * Automatically checks if a JPEGMeta object is available or if all data is
      * supplied in array
      */
-    function _meta(&$img,$opt){
+    function _meta($img,$opt){
         if($img['meta']){
             // map JPEGMeta calls to opt names
 
             switch($opt){
                 case 'title':
-                    return $img['meta']->getField('Simple.Title');
+                    return $img['meta']->getField($this->metaAliases['img_title']);
                 case 'desc':
-                    return $img['meta']->getField('Iptc.Caption');
+                    return $img['meta']->getField($this->metaAliases['img_caption']);
+                case 'keywords':
+                    return $img['meta']->getField($this->metaAliases['img_keywords']);
                 case 'cdate':
-                    return $img['meta']->getField('Date.EarliestTime');
+                    return $img['meta']->getField($this->metaAliases['img_date']);
                 case 'width':
-                    return $img['meta']->getField('File.Width');
+                    return $img['meta']->getField($this->metaAliases['img_width']);
                 case 'height':
-                    return $img['meta']->getField('File.Height');
+                    return $img['meta']->getField($this->metaAliases['img_height']);
                 default:
                     return '';
             }
@@ -841,6 +847,36 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
             // just return the array field
             return $img[$opt];
         }
+    }
+
+    /**
+     * Use the existing DokuWiki-configuration to find all aliases for a given image meta-information
+     *
+     * This is based on @see tpl_get_img_meta()
+     *
+     * @return array
+     */
+    protected function getMetaTagAliases() {
+        $config_files = getConfigFiles('mediameta');
+        foreach ($config_files as $config_file) {
+            if(file_exists($config_file)) {
+                include($config_file);
+            }
+        }
+        /** @var array $fields the included array with metadata */
+
+        $tagAliases = array();
+        foreach($fields as $tag){
+            $t = array();
+            if (!empty($tag[0])) {
+                $t = array($tag[0]);
+            }
+            if(is_array($tag[3])) {
+                $t = array_merge($t,$tag[3]);
+            }
+            $tagAliases[$tag[1]] = $t;
+        }
+        return $tagAliases;
     }
 
     /**
@@ -893,6 +929,18 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 							$ret .= '<h4>'.hsc($title).'</h4>';
 						}
 				}
+				if ($data['showdesc']) {
+                    $desc = $this->_meta($img,'desc');
+                    if(!empty($desc)){
+                        $ret .= '<p>'.nl2br(hsc($desc)).'</p>';
+                    }
+                }
+                if ($data['showkeywords']) {
+                    $keywords = $this->_meta($img,'keywords');
+                    if(!empty($keywords)){
+                        $ret .= '<p>'.hsc($keywords).'</p>';
+                    }
+                }
 				if ($data['showinfo']){
 						$ret .= $this->_exif($img);
 				}
