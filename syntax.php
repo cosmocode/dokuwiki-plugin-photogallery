@@ -303,6 +303,8 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         global $conf;
         global $lang;
 				global $ID;
+				global $auth;
+				global $USERINFO;
 				
 				//dbg($data);
         $cmd = $data['command'];
@@ -329,7 +331,9 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 						if (class_exists('ZipArchive')){
 								$zip = $data['ns'].":".$data['zipfile'];
 								$this->_createzipfile($files, mediaFN($zip));
-								$data['ziplink'] = $R->internalmedia($zip,$this->getLang('lnk_download'),null,null,null,null,'linkonly',true);
+								if($this->_zip_auth_check($data)){								
+										$data['ziplink'] = $R->internalmedia($zip,$this->getLang('lnk_download'),null,null,null,null,'linkonly',true);
+								}
 						}
 						else
 							msg($this->getLang('zipdisabled'),2);
@@ -1010,7 +1014,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 		}
 
     /**
-     * Check ACLs
+     * Check ACLs on Gallery
      */
 		function _auth_check($data){
 				global $USERINFO;
@@ -1023,6 +1027,28 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				if(is_null($user)) return false;
 				$groups = (array) $USERINFO['grps'];
 				$authlist = $data['authlist'];
+				if (isset($authlist)){
+					$authlist .= ','.$conf['superuser'];
+					return auth_isMember($authlist, $user, $groups);
+				}
+				else
+					return true;
+		}
+
+    /**
+     * Check ACLs on Zip link
+     */
+		function _zip_auth_check($data){
+				global $USERINFO;
+				global $auth;
+				global $conf;
+
+				if(!$auth) return false;
+				$user .= $_SERVER['REMOTE_USER'];
+
+				if(is_null($user)) return false;
+				$groups = (array) $USERINFO['grps'];
+				$authlist = $data['zipauthlist'];
 				if (isset($authlist)){
 					$authlist .= ','.$conf['superuser'];
 					return auth_isMember($authlist, $user, $groups);
