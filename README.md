@@ -1,4 +1,4 @@
-PhotoGallery Plugin for DokuWiki
+# PhotoGallery Plugin for DokuWiki
 
 All documentation for this plugin can be found at
 http://www.dokuwiki.org/plugin:photogallery
