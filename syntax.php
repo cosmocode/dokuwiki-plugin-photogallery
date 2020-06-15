@@ -952,6 +952,11 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 				if ($data['showfname']){
 						$ret .= '<p>'.hsc($img['file']).'</p>';
 				}
+                if ($data['showlink']){
+                    $ret .= '<p><a href="'.ml($img['id'], '', false).'">' .
+                        '<img title="Details" src="' . DOKU_BASE .
+                        'lib/plugins/photogallery/images/details_page.png" width="30" /></a></p>';
+                }
 				return $ret;
 		}
 	
