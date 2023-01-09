@@ -60,7 +60,6 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
      */
     function handle($match, $state, $pos, Doku_Handler $handler){
         global $ID;
-				global $conf;
 
         $data = array();
 
@@ -68,14 +67,14 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         $lines = explode("\n", $match);
         array_pop($lines);
 
-				// get command
+        // get command
         $cmd = array_shift($lines);
         $cmd = str_replace('photogallery', '', $cmd);
         $cmd = trim($cmd, '- ');
-				if (!strpos('show|link',$cmd)) {
-						$cmd = 'show';
-				}
-				$data['command'] = $cmd;
+        if (!strpos('show|link',$cmd)) {
+            $cmd = 'show';
+        }
+        $data['command'] = $cmd;
 
         // set the defaults
         $data['phpthumb']    = $this->getConf('use_phpThumb');
@@ -96,12 +95,11 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         $data['sort']        = $this->getConf('sort');
         $data['limit']       = 0;
         $data['offset']      = 0;
-        //$data['fullsize']    = 0;
-				$data['ns']          = getNS($ID);
-				$this->_setConfOptions($data,$this->getConf('options'));
+        $data['ns']          = getNS($ID);
+        $this->_setConfOptions($data,$this->getConf('options'));
 
         // parse additional options
-        $params = $this->getConf('options').','.$params;
+        $params = $this->getConf('options');
         $params = preg_replace('/[,&\?]+/',' ',$params);
         $params = explode(' ',$params);
         foreach($params as $param){
@@ -139,110 +137,80 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
             }
         }
 
-				// Check phpThumb requirements
-				if ($data['phpthumb'] == true){
-						if (!$this->_phpThumbCheck()){
-								msg($this->getLang('phpthumbdisabled'),2);
-								$data['phpthumb'] = false;
-						}
-				}
+        // Check phpThumb requirements
+        if ($data['phpthumb'] == true){
+            if (!$this->_phpThumbCheck()){
+                msg($this->getLang('phpthumbdisabled'),2);
+                $data['phpthumb'] = false;
+            }
+        }
 
         // parse info
-        foreach($lines as $line) {
+        foreach ($lines as $line) {
             // ignore comments
             preg_match('/^(.*?(?<![&\\\\]))(?:#(.*))?$/', $line, $matches);
             $line = $matches[1];
             $line = str_replace('\\#', '#', $line);
             $line = trim($line);
-            if(empty($line)) continue;
+            if (empty($line)) continue;
             $line = preg_split('/\s*:\s*/', $line, 2);
-//            $line = preg_split('/*:*/', $line, 1);
-						if($line[0] == 'namespace') $line[0] = 'ns';
-						if($line[0] == 'page') $line[0] = 'pg';
+            if ($line[0] == 'namespace') $line[0] = 'ns';
+            if ($line[0] == 'page') $line[0] = 'pg';
 
-						if($line[0] == 'ns'){
-								if(preg_match('/^https?:\/\//i',$line[1]))
-										$data['rss'] = true;
-								else
-										$line[1] = resolve_id(getNS($ID),$line[1]);
-						}
-						if($line[0] == 'pg'){
-								$line[1] = resolve_id(getNS($ID),$line[1]);
-						}
+            if ($line[0] == 'ns'){
+                if (preg_match('/^https?:\/\//i',$line[1]))
+                    $data['rss'] = true;
+                else
+                    $line[1] = resolve_id(getNS($ID),$line[1]);
+            }
+            if ($line[0] == 'pg') {
+                $line[1] = resolve_id(getNS($ID),$line[1]);
+            }
 
-						// decode height x width values [pti]size strings
-						if(preg_match('/^([pti])(size)$/',$line[0],$type)){
-								if(preg_match('/^(\d+)([xX])(\d+)$/',$line[1],$size)){
+            // decode height x width values [pti]size strings
+            if (preg_match('/^([pti])(size)$/',$line[0],$type)) {
+                if (preg_match('/^(\d+)([xX])(\d+)$/',$line[1],$size)) {
                     $data[$type[1].'w'] = $size[1];
                     $data[$type[1].'h'] = $size[3];
-								}
-						}
+                }
+            }
 
-						// handle negated options, converts "!crop" to "crop = false"
-						if (!$line[1]){
-								if (preg_match('/^\!.{1,}/', $line[0], $matches))
-									$line[0] = substr($matches[0],1);
-								else
-									$line[1] = true;
-						}
-//           $column = $this->dthlp->_column($line[0]);
-						$data [$line[0]]=$line[1];
-            // if(isset($matches[2])) {// NOM da verificare
-                // $column['comment'] = $matches[2];
-            // }
-            // if($column['multi']) {
-                // if(!isset($data[$column['key']])) {
-                    // // init with empty array
-                    // // Note that multiple occurrences of the field are
-                    // // practically merged
-                    // $data[$column['key']] = array();
-                // }
-                // $vals = explode(',', $line[1]);
-                // foreach($vals as $val) {
-                    // $val = trim($this->dthlp->_cleanData($val, $column['type']));
-                    // if($val == '') continue;
-                    // if(!in_array($val, $data[$column['key']])) {
-                        // $data[$column['key']][] = $val;
-                    // }
-                // }
-            // } else {
-// //                $data[$column['key']] = $this->dthlp->_cleanData($line[1], $column['type']);
-            // }
-//            $properties[$column['key']] = $column;
+            // handle negated options, converts "!crop" to "crop = false"
+            if (!$line[1]) {
+                if (preg_match('/^\!.{1,}/', $line[0], $matches))
+                    $line[0] = substr($matches[0],1);
+                else
+                    $line[1] = true;
+            }
+            $data[$line[0]] = $line[1];
         }
-        // return array(
-            // 'data' => $data, 'command' => $command
-        // ); // not utf8_strlen
 
-				// If in link mode, read instructions from linked page
-				if ($cmd == 'link'){
-					$page = $data['pg'];
-					if (page_exists($page)){
-						$instr = p_cached_instructions(wikiFN($page),false,$page);
-					}
-					if (isset($instr)){
-						foreach($instr as $sec){ //NOM forse si può usare array search
-							if ($sec[0] == 'plugin'){
-								if ($sec[1][0] == 'photogallery'){
-									$rdata = $sec[1][1];
-								}
-							}
-							if (isset($rdata)){
-								$data['ns'] = $rdata['ns'];
-								foreach ($rdata as $key => $value){
-									if ((!isset($data[$key])) and (isset($rdata[$key]))){
-										$data[$key] = $value;
-									}
-								}
-								break;
-							}
-						}
-					}
-					else{
-//						unset($data['pg']);
-					}
-				}
-				return $data;
+        // If in link mode, read instructions from linked page
+        if ($cmd == 'link'){
+            $page = $data['pg'];
+            if (page_exists($page)){
+                $instr = p_cached_instructions(wikiFN($page),false,$page);
+            }
+            if (isset($instr)){
+                foreach($instr as $sec){ //NOM forse si può usare array search
+                    if ($sec[0] == 'plugin'){
+                        if ($sec[1][0] == 'photogallery'){
+                            $rdata = $sec[1][1];
+                        }
+                    }
+                    if (isset($rdata)){
+                        $data['ns'] = $rdata['ns'];
+                        foreach ($rdata as $key => $value){
+                            if ((!isset($data[$key])) and (isset($rdata[$key]))){
+                                $data[$key] = $value;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        return $data;
     }
 
     /**
@@ -255,7 +223,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
      */
     function render($mode, Doku_Renderer $R, $data){
         global $ID;
-				global $conf;
+        global $conf;
 
         $this->metaAliases = $this->getMetaTagAliases();
 
@@ -679,7 +647,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
             $vsrc = ml($ID);
             //$vsrc = ml($ID,$tdim);
             $topt = 'zc=C'; // Crop to given size
-            if ($img['poster']){
+            if ( !empty($img['poster'])){
                 $ID = $img['poster'];
                 $topt .= '!fltr=over|../images/video_frame.png';
                 $img['meta'] = new JpegMeta(mediaFN($ID));
@@ -690,8 +658,8 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
             } else {
                     $tpar['src'] = 'video_thumb.png';
                     $ipar['src'] = 'video_poster.jpg';
-                    // $iw = $data['iw'];
-                    // $ih = $data['ih'];
+                     $iw = '';
+                     $ih = '';
             }
         } else {
             $mw = (int) $this->_meta($img,'width');
@@ -804,9 +772,8 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
      * supplied in array
      */
     function _meta($img,$opt){
-        if($img['meta']){
+        if (!empty($img['meta'])) {
             // map JPEGMeta calls to opt names
-
             switch($opt){
                 case 'title':
                     return $img['meta']->getField($this->metaAliases['img_title']);
@@ -825,7 +792,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
             }
         }else{
             // just return the array field
-            return $img[$opt];
+            return $img[$opt] ?? [];
         }
     }
 
@@ -927,7 +894,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         if (!empty($data['showfname'])) {
             $ret .= '<p>'.hsc($img['file']).'</p>';
         }
-        if ($data['showlink']){
+        if (!empty($data['showlink'])) {
             $ret .= '<p><a href="'.ml($img['id'], '', false).'">' .
                 '<img title="Details" src="' . DOKU_BASE .
                 'lib/plugins/photogallery/images/details_page.png" width="30" /></a></p>';
@@ -1004,10 +971,10 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 
         if (!$auth) return false;
 
-        $user = $INPUT->str('REMOTE_USER');
+        $user = $INPUT->server->str('REMOTE_USER');
         if (is_null($user)) return false;
 
-        $groups = (array) $USERINFO['grps'];
+        $groups = $USERINFO['grps'] ?? [];
 
         if (!empty($data['authlist'])) {
             $authlist = $data['authlist'] . ','. $conf['superuser'];
@@ -1019,24 +986,25 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
     /**
      * Check ACLs on Zip link
      */
-		function _zip_auth_check($data){
-				global $USERINFO;
-				global $auth;
-				global $conf;
+    function _zip_auth_check($data){
+        global $INPUT;
+        global $USERINFO;
+        global $auth;
+        global $conf;
 
-				if(!$auth) return false;
-				$user .= $_SERVER['REMOTE_USER'];
+        if(!$auth) return false;
+        $user = $INPUT->server->str('REMOTE_USER');
 
-				if(is_null($user)) return false;
-				$groups = (array) $USERINFO['grps'];
-				$authlist = $data['zipauthlist'];
-				if (isset($authlist)){
-					$authlist .= ','.$conf['superuser'];
-					return auth_isMember($authlist, $user, $groups);
-				}
-				else
-					return true;
-		}
+        if(is_null($user)) return false;
+        $groups = $USERINFO['grps'] ?? [];
+        $authlist = $data['zipauthlist'];
+        if (isset($authlist)){
+            $authlist .= ','.$conf['superuser'];
+            return auth_isMember($authlist, $user, $groups);
+        }
+        else
+            return true;
+    }
 
     /**
      * Return if a namespace has exists as media folder
