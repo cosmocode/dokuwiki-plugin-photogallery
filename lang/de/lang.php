@@ -6,9 +6,9 @@
  * @author       Marco Nolletti
  * @contributors Felix Mühlbauer, Michael Große
 */
- 
+
 $lang['imagescnt'] = '%s Bilder';
-$lang['videoocnt'] = '%s Videos';
+$lang['videoscnt'] = '%s Videos';
 $lang['lnk_download'] = 'Herunterladen';
 $lang['notauthorized'] = 'Du hast leider keine Berechtigungen das Fotoalbum <b>%s</b> anzusehen.';
 $lang['nsnotexists'] = 'Achtung, das Verzeichnis zum Namensraum <b>%s</b> existiert nicht.';
