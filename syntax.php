@@ -336,7 +336,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         } else {
             $dir = utf8_encodeFN(str_replace(':','/',$data['ns']));
             // all possible images for the given namespace
-            $depth = (bool)($data['recursive'] ?? 1);
+            $depth = $data['recursive'] ?? 1;
             search($files,
                  $conf['mediadir'],
                  'search_media',
@@ -636,7 +636,10 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
      * Defines the lightGallery images markup
      */
     protected function _image(&$img,$data,$idx){
-        global $conf;
+
+        // unsupported file
+        if (empty($img['isimg']) && empty($img['isvid'])) return '';
+
         $tpar = array();
         $ipar = array();
         $ID = $img['id'];
@@ -791,8 +794,8 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
                     return '';
             }
         }else{
-            // just return the array field
-            return $img[$opt] ?? [];
+            // just return an empty field
+            return $img[$opt] ?? '';
         }
     }
 
@@ -907,7 +910,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
      */
 		function _exif($img){
 				// Read EXIF data
-				$jpeg = $img['meta'];
+				$jpeg = $img['meta'] ?? null;
 				$ret = '';
         if($jpeg){
 						$make  = $jpeg->getField(array('Exif.Make','Exif.TIFFMake'));
