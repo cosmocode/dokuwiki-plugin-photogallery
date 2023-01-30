@@ -1,0 +1,12 @@
+# This is a list of files that were present in previous releases
+# but were removed later. They should not exist in your installation.
+README
+helper.php
+images/image_fullsize.png
+images/movie_poster.jpg
+images/movie_thumb.png
+phpThumb/Version.txt
+phpThumb/pgFetch.php
+phpThumb/pgImg.php
+phpThumb/pgThumb.php
+phpThumb/phpThumb.config.php
