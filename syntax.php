@@ -227,94 +227,100 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
 
         $this->metaAliases = $this->getMetaTagAliases();
 
-        $cmd = $data['command'];
-        if ($mode == 'xhtml') {
-            if ($this->_auth_check($data)){
-                $R->info['cache'] = false; // Disable global render cache
-                $this->_photo_gallery($data, $R); // Start gallery
-            }
-            elseif ($cmd == 'show')
-                msg(sprintf($this->getLang('notauthorized'),$data['ns']),-1);
-            return true;
-        } elseif ($mode == 'metadata') { // NOM da rivedere
+				$cmd = $data['command'];
+        if($mode == 'xhtml'){
+
+						if($this->_auth_check($data)){
+								$R->info['cache'] = false; // Disable global render cache
+								$this->_photo_gallery($data, $R); // Start gallery
+						}
+						elseif($cmd == 'show')
+								msg(sprintf($this->getLang('notauthorized'),$data['ns']),-1);
+						return true;
+        }elseif($mode == 'metadata'){ // NOM da rivedere
             $rel = p_get_metadata($ID,'relation',METADATA_RENDER_USING_CACHE);
             $img = $rel['firstimage'];
-            if (empty($img)) {
+            if(empty($img)){
                 $files = $this->_findimages($data);
             }
             return true;
         }
         return false;
-    }
+		}
 
-    protected function _phpThumbCheck(){
-        $fperm = fileperms(PHOTOGALLERY_PGFETCH_FILE);
-        if (($fperm & PHOTOGALLERY_PGFETCH_EXE_PERM) != PHOTOGALLERY_PGFETCH_EXE_PERM){
-            msg($this->getLang('phpthumbexecerror'),-1);
-            if (@chmod(PHOTOGALLERY_PGFETCH_FILE, $fperm | PHOTOGALLERY_PGFETCH_EXE_PERM)){
-                msg($this->getLang('phpthumbexecpermset'),1);
-                return true;
-            }
-            else{
-                msg($this->getLang('phpthumbpermseterror'),-1);
-                return false;
-            }
-        }
-        return true;
-    }
+		function _phpThumbCheck(){
+				$fperm = fileperms(PHOTOGALLERY_PGFETCH_FILE);
+				if (($fperm & PHOTOGALLERY_PGFETCH_EXE_PERM) != PHOTOGALLERY_PGFETCH_EXE_PERM){
+						msg($this->getLang('phpthumbexecerror'),-1);
+						if (@chmod(PHOTOGALLERY_PGFETCH_FILE, $fperm | PHOTOGALLERY_PGFETCH_EXE_PERM)){
+								msg($this->getLang('phpthumbexecpermset'),1);
+								return true;
+						}
+						else{
+								msg($this->getLang('phpthumbpermseterror'),-1);
+								return false;
+						}
+				}
+				return true;
+		}
 
     /**
      * Does the gallery formatting
      */
-    protected function _photo_gallery($data, $R){
+    function _photo_gallery($data, $R){
+        global $conf;
         global $lang;
+        global $ID;
+        global $auth;
+        global $USERINFO;
 
         $cmd = $data['command'];
         if (empty($data['rss'])) {
-            if (($cmd == 'show') and (!$this->_media_folder_exists($data['ns']))) {
-                $R->doc .= '<div class="nothing">'.sprintf($this->getLang('nsnotexists'),$data['ns']).'</div>';
-                return true;
-            } elseif (($cmd == 'link') and (!page_exists($data['pg']))) {
-                $R->doc .= '<div class="nothing">'.sprintf($this->getLang('pgnotexists'),$data['pg']).'</div>';
-                return true;
+            if(($cmd == 'show') and (!$this->_media_folder_exists($data['ns']))){
+                    $R->doc .= '<div class="nothing">'.sprintf($this->getLang('nsnotexists'),$data['ns']).'</div>';
+                    return true;
+            }elseif (($cmd == 'link') and (!page_exists($data['pg']))){
+                    $R->doc .= '<div class="nothing">'.sprintf($this->getLang('pgnotexists'),$data['pg']).'</div>';
+                    return true;
             }
         }
 
         $files = $this->_findimages($data);
 
         // anything found?
-        if (!count($files)) {
+        if(!count($files)){
             $R->doc .= '<div class="nothing">'.$lang['nothingfound'].'</div>';
             return;
         }
 
-        // in not exists create in the media folder a zip file containing all the images and link it
-        if (isset($data['zipfile']))
-            if (class_exists('ZipArchive')){
-                $zip = $data['ns'].":".$data['zipfile'];
-                $this->_createzipfile($files, mediaFN($zip));
-                if($this->_zip_auth_check($data)){
-                        $data['ziplink'] = $R->internalmedia($zip,$this->getLang('lnk_download'),null,null,null,null,'linkonly',true);
-                }
-            }
-            else
-                msg($this->getLang('zipdisabled'),2);
+				// in not exists create in the media folder a zip file containing all the images and link it
+				if (isset($data['zipfile']))
+						if (class_exists('ZipArchive')){
+								$zip = $data['ns'].":".$data['zipfile'];
+								$this->_createzipfile($files, mediaFN($zip));
+								if($this->_zip_auth_check($data)){
+										$data['ziplink'] = $R->internalmedia($zip,$this->getLang('lnk_download'),null,null,null,null,'linkonly',true);
+								}
+						}
+						else
+							msg($this->getLang('zipdisabled'),2);
 
-        // output pg-container
-        $R->doc .= '<div class="pg-container">'.DOKU_LF;
+				// output pg-container
+				$R->doc .= '<div class="pg-container">'.DOKU_LF;
 
-        // output pg-poster and pg-description
-        if ($data['posteralign'] == 'right'){
-            $this->_description($files,$data,$R);
-            $this->_poster($files,$data,$R);
-        }
-        else{
-            $this->_poster($files,$data,$R);
-            $this->_description($files,$data,$R);
-        }
+				// output pg-poster and pg-description
+				if ($data['posteralign'] == 'right'){
+					$this->_description($files,$data,$R);
+					$this->_poster($files,$data,$R);
+				}
+				else{
+					$this->_poster($files,$data,$R);
+					$this->_description($files,$data,$R);
+				}
 
-        // Close container
-        $R->doc .= '</div>'.DOKU_LF;
+				// Close container
+				$R->doc .= '</div>'.DOKU_LF;
+				return;
     }
 
     /**
@@ -342,30 +348,23 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
         $len = count($files);
         if (!$len) return $files;
         if ($len == 1) return $files;
-
-        // sort files before throwing away video thumbs too early
-        /** @var helper_plugin_photogallery $helper */
-        $helper = plugin_load('helper', 'photogallery');
-        usort($files, [$helper, 'sortFoundFiles']);
-
         // filter images
         for ($i=0; $i<$len; $i++) {
             if ($data['fullsize'] == true)
                 $files[$i]['fullsize'] = true;
             $fname = $files[$i]['file'];
             if (preg_match('/\_([a-z]+?)\_\.(jpe?g|gif|png)$/',$fname,$matches)){
-                $modifier = $matches[1];
-                if(($modifier == 'fullsize') || ($data['fullsize'] == 1))		// Show in full size
-                        $files[$i]['fullsize'] = true;
-                elseif($modifier == 'poster')			// Is a video poster image, remove from list
-                        $files[$i]['isimg'] = false;
+                    $modifier = $matches[1];
+                    if(($modifier == 'fullsize') || ($data['fullsize'] == 1))		// Show in full size
+                            $files[$i]['fullsize'] = true;
+                    elseif($modifier == 'poster')			// Is a video poster image, remove from list
+                            $files[$i]['isimg'] = false;
             }
             if (!$files[$i]['isimg']) {
                 if (preg_match('/(.*?)\.(avi|mov|mp4)$/',$fname,$matches)) {	// Is a video
-                    $files[$i]['isvid'] = true;
-                    $poster = getNS($files[$i]['id']).':'.$matches[1].'_poster_.jpg'; // NOM: così i poster possono solo essere jpeg
-                    if (in_array($poster,array_column($files,'id'))) // Check if poster exists
-                        $files[$i]['poster'] = $poster;
+                        $files[$i]['isvid'] = true;
+                        $poster = getNS($files[$i]['id']).':'.$matches[1].'_poster_.jpg'; // NOM: così i poster possono solo essere jpeg
+                        if(media_exists($poster)) $files[$i]['poster'] = $poster;
                 }
                 else {
                     array_splice($files, $i, 1); // unset will not reindex the array, so putting the poster on first position fails
@@ -376,7 +375,7 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
                 if ($data['filter']) {
                     if(!preg_match($data['filter'],noNS($files[$i]['id'])))
                         unset($files[$i]); // NOM da verificare unset come sopra se si decide di usare filter
-                }
+            }
             }
         }
         if ($len<1) return $files;
