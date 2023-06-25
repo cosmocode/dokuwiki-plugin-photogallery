@@ -335,8 +335,8 @@ class syntax_plugin_photogallery extends DokuWiki_Syntax_Plugin {
             $files = $this->_loadRSS($data['ns']);
         } else {
             $dir = utf8_encodeFN(str_replace(':','/',$data['ns']));
-            // all possible images for the given namespace
-            $depth = $data['recursive'] ?? 1;
+            // just current level or deep recursion into namespace?
+            $depth = !empty($data['recursive']) ? 0 : 1;
             search($files,
                  $conf['mediadir'],
                  'search_media',
